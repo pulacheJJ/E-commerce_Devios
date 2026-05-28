@@ -1,0 +1,152 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Carrito;
+use App\Models\ElementoCarrito;
+use App\Models\VarianteProducto;
+use Illuminate\Support\Str;
+
+class CarritoService
+{
+    /* =========================================================
+       MÉTODOS PÚBLICOS (Orquestadores de Casos de Uso)
+       ========================================================= */
+
+    /**
+     * Agrega un item al carrito desde la vista del producto.
+     */
+    public function agregarItem(int $varianteId, int $cantidad): array
+    {
+        $carrito = $this->obtenerOCrearCarrito();
+        $elemento = $this->obtenerElemento($carrito->id, $varianteId);
+
+        $nuevaCantidad = ($elemento ? $elemento->cantidad : 0) + $cantidad;
+
+        // Delegamos la validación a la regla de negocio
+        $validacion = $this->validarLimites($varianteId, $nuevaCantidad);
+        if (!$validacion['valido']) {
+            return ['success' => false, 'message' => $validacion['mensaje']];
+        }
+
+        $this->guardarElemento($elemento, $carrito->id, $varianteId, $nuevaCantidad);
+
+        return ['success' => true, 'total_items' => $carrito->elementos()->count()];
+    }
+
+    /**
+     * Actualiza la cantidad exacta desde los botones (+) y (-) del carrito.
+     */
+    public function actualizarCantidad(int $elementoId, int $nuevaCantidad): array
+    {
+        $elemento = ElementoCarrito::find($elementoId);
+        if (!$elemento) {
+            return ['success' => false, 'message' => 'Elemento no encontrado.'];
+        }
+
+        // Reutilizamos la misma regla de negocio para consistencia
+        $validacion = $this->validarLimites($elemento->variante_id, $nuevaCantidad);
+        if (!$validacion['valido']) {
+            return ['success' => false, 'message' => $validacion['mensaje']];
+        }
+
+        $elemento->update(['cantidad' => $nuevaCantidad]);
+
+        return ['success' => true];
+    }
+
+    /**
+     * Elimina un item. Si el carrito queda vacío, se auto-elimina de la BD.
+     */
+    public function eliminarItem(int $elementoId): void
+    {
+        $elemento = ElementoCarrito::find($elementoId);
+
+        if ($elemento) {
+            $carrito = $elemento->carrito;
+            $elemento->delete();
+            $this->limpiarSesionSiEstaVacio($carrito);
+        }
+    }
+
+    /**
+     * Obtiene el carrito actual con todos sus datos anidados para la vista.
+     */
+    public function obtenerCarritoActual()
+    {
+        $token = session()->get('carrito_token');
+        if (!$token)
+            return null;
+
+        return Carrito::with(['elementos.variante.producto.imagenes'])
+            ->where('token_sesion', $token)
+            ->first();
+    }
+
+    /* =========================================================
+       MÉTODOS PRIVADOS (Reglas de Negocio Aisladas - SRP)
+       ========================================================= */
+
+    private function obtenerOCrearCarrito(): Carrito
+    {
+        if (!session()->has('carrito_token')) {
+            session()->put('carrito_token', Str::uuid()->toString());
+        }
+        return Carrito::firstOrCreate(['token_sesion' => session()->get('carrito_token')]);
+    }
+
+    private function obtenerElemento(int $carritoId, int $varianteId): ?ElementoCarrito
+    {
+        return ElementoCarrito::where('carrito_id', $carritoId)
+            ->where('variante_id', $varianteId)
+            ->first();
+    }
+
+    /**
+     * Regla central: La cantidad no puede superar el stock ni el tope máximo de la tienda.
+     */
+    private function validarLimites(int $varianteId, int $nuevaCantidad): array
+    {
+        if ($nuevaCantidad < 1) {
+            return ['valido' => false, 'mensaje' => 'La cantidad mínima es 1.'];
+        }
+
+        $variante = VarianteProducto::find($varianteId);
+        if (!$variante) {
+            return ['valido' => false, 'mensaje' => 'Producto no disponible.'];
+        }
+
+        // Límite: El stock real disponible, pero nunca más de 10 por compra
+        $limiteMaximo = min($variante->stock, 10);
+
+        if ($nuevaCantidad > $limiteMaximo) {
+            return [
+                'valido' => false,
+                'mensaje' => "El límite es de $limiteMaximo unidades para este producto."
+            ];
+        }
+
+        return ['valido' => true, 'mensaje' => 'OK'];
+    }
+
+    private function guardarElemento(?ElementoCarrito $elemento, int $carritoId, int $varianteId, int $nuevaCantidad): void
+    {
+        if ($elemento) {
+            $elemento->update(['cantidad' => $nuevaCantidad]);
+        } else {
+            ElementoCarrito::create([
+                'carrito_id' => $carritoId,
+                'variante_id' => $varianteId,
+                'cantidad' => $nuevaCantidad,
+            ]);
+        }
+    }
+
+    private function limpiarSesionSiEstaVacio(Carrito $carrito): void
+    {
+        if ($carrito->elementos()->count() === 0) {
+            $carrito->delete();
+            session()->forget('carrito_token');
+        }
+    }
+}
