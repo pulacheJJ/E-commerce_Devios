@@ -13,8 +13,11 @@ class Cliente extends Model
         'telefono',
         'tipo_documento',
         'numero_documento',
-        'direccion_predeterminada',
     ];
+    public function direcciones()
+    {
+        return $this->hasMany(Direccion::class);
+    }
 
     // Relación: Un cliente puede tener muchos pedidos históricos
     public function pedidos()
