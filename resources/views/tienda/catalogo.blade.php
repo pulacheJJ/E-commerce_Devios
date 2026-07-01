@@ -5,36 +5,37 @@
         <link rel="stylesheet" href="{{ asset('css/tienda.css') }}">
     </x-slot:css>
 
+    @if (isset($slides) && $slides->count() > 0)
+        <x-tienda.slider :slides="$slides" />
+    @endif
+
     <main class="store-container">
-        <header class="store-header">
-            <h1 class="store-header__title">Catálogo de Productos</h1>
-            <p class="store-header__subtitle">Encuentra la mejor tecnología y accesorios.</p>
+
+        <x-tienda.categorias-horizontales :categorias="$categoriasPadre" />
+
+        <header class="store-header {{ isset($promocion) ? 'store-header--promocion' : '' }}">
+            <h1 class="store-header__title">
+                @if (isset($promocion))
+                    <i class="fas fa-tag"></i> {{ $promocion->titulo }}
+                @else
+                    Catálogo de Productos
+                @endif
+            </h1>
+
+            <p class="store-header__subtitle">
+                @if (isset($promocion))
+                    {{ $promocion->subtitulo }}
+                @else
+                    Encuentra la mejor tecnología y accesorios.
+                @endif
+            </p>
         </header>
 
         <div class="store-layout">
 
-            <x-tienda.sidebar-filtros :categorias="$categorias" />
+            <x-tienda.sidebar-filtros :marcas="$marcas" />
 
             <div class="store-main">
-                <section class="search-section">
-                    <form action="{{ route('tienda.catalogo') }}" method="GET" class="search-form" id="formBuscador">
-                        @if (request('categoria'))
-                            <input type="hidden" name="categoria" value="{{ request('categoria') }}">
-                        @endif
-
-                        <div class="search-input-wrapper">
-                            <i class="fas fa-search search-icon"></i>
-                            <input type="text" name="buscar" id="inputBuscar" class="search-input"
-                                placeholder="Buscar por nombre, marca o modelo..." value="{{ request('buscar') }}">
-
-                            @if (request('buscar'))
-                                <button type="button" class="btn-clear-search" id="btnLimpiarBuscar"
-                                    title="Limpiar búsqueda">&times;</button>
-                            @endif
-                        </div>
-                        <button type="submit" class="btn btn--primary">Buscar</button>
-                    </form>
-                </section>
 
                 <section class="products-grid">
                     @forelse($productos as $producto)
@@ -61,6 +62,7 @@
     </main>
 
     <x-slot:js>
+        <script src="{{ asset('js/tienda/slider.js') }}"></script>
         <script src="{{ asset('js/tienda/catalogo.js') }}"></script>
     </x-slot:js>
 </x-layouts.app>

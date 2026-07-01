@@ -5,26 +5,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ?? 'Mi E-Commerce Pro' }}</title>
+    <title>{{ $title ?? 'DEVIOZ Store' }}</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    {{ $css ?? '' }}
+    @isset($css)
+        {{ $css }}
+    @endisset
 </head>
 
 <body>
 
-    <x-navbar />
+    @if (!request()->routeIs('checkout.*'))
+        <x-tienda.navbar />
+    @endif
 
-    <main class="contenedor-principal">
-        {{ $slot }}
-    </main>
+    {{ $slot }}
+    <x-footer /> @isset($js)
+        {{ $js }}
+    @endisset
 
-    <x-footer />
+    @isset($js)
+        {{ $js }}
+    @endisset
 
-    <script src="{{ asset('js/app.js') }}"></script>
-    {{ $js ?? '' }}
 </body>
 
 </html>

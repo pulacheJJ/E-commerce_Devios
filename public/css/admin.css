@@ -1,5 +1,5 @@
-/* public/css/admin.css */
-
+@import url('admin/sliders.css');
+@import url('admin/promociones.css');
 :root {
     --bg: #06121a;
     --bg2: #0a1b26;
@@ -39,6 +39,20 @@ body {
     position: fixed;
     height: 100vh;
     box-sizing: border-box;
+}
+/*LOGO */
+.sidebar__logo {
+    display: flex;
+    align-items: center;
+}
+.sidebar__logo a {
+    display: block;
+}
+.sidebar__logo .logo-img {
+    height: 40px; 
+    width: auto;  
+    object-fit: contain;
+    display: block;
 }
 
 .sidebar__logo {
@@ -478,4 +492,18 @@ h6 {
     font-weight: bold;
     text-align: center;
     padding: 3px 0;
+}
+
+.sidebar__logo {
+    display: flex;
+    align-items: center;
+}
+.sidebar__logo a {
+    display: block;
+}
+.sidebar__logo .logo-img {
+    height: 40px; 
+    width: auto;  
+    object-fit: contain;
+    display: block;
 }

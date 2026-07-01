@@ -1,0 +1,368 @@
+/* =========================================
+   MÓDULO SLIDER - ADMINISTRADOR
+   ========================================= */
+.slider-admin-container {
+    padding: 30px;
+    background-color: #020617;
+    min-height: 100vh;
+    color: #f8fafc;
+}
+
+.slider-admin-title {
+    color: #14b8a6;
+    margin-bottom: 30px;
+    font-size: 2rem;
+}
+
+.slider-alert-success {
+    background-color: #064e3b;
+    color: #34d399;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+/* Grid y Tarjetas */
+.slider-admin-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 30px;
+}
+
+.slider-admin-card {
+    background-color: #0f172a;
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px solid #1e293b;
+}
+
+.slider-admin-card-title {
+    margin-top: 0;
+    color: #fff;
+    margin-bottom: 20px;
+    font-size: 1.25rem;
+}
+
+/* Formularios */
+.slider-form-group {
+    margin-bottom: 15px;
+}
+
+.slider-form-row {
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.slider-label {
+    display: block;
+    margin-bottom: 5px;
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+.slider-input {
+    width: 100%;
+    padding: 10px;
+    background-color: #020617;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 0.95rem;
+}
+
+.slider-input:focus {
+    outline: none;
+    border-color: #14b8a6;
+}
+
+.slider-input-file {
+    color: #94a3b8;
+    width: 100%;
+}
+
+.slider-checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 25px;
+}
+
+.slider-checkbox-label {
+    color: #94a3b8;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Botones */
+.slider-btn-submit {
+    width: 100%;
+    padding: 12px;
+    background-color: #14b8a6;
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.slider-btn-submit:hover {
+    background-color: #0d9488;
+}
+
+.slider-btn-update {
+    width: 100%;
+    padding: 12px;
+    background-color: #fbbf24;
+    border: none;
+    border-radius: 6px;
+    color: #0f172a;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.slider-btn-update:hover {
+    background-color: #f59e0b;
+}
+
+/* Tabla */
+.slider-table-wrapper {
+    overflow-x: auto;
+}
+
+.slider-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.95rem;
+}
+
+.slider-table th {
+    padding: 12px;
+    border-bottom: 1px solid #334155;
+    color: #14b8a6;
+}
+
+.slider-table td {
+    padding: 12px;
+    border-bottom: 1px solid #1e293b;
+    color: #cbd5e1;
+    vertical-align: middle;
+}
+
+.slider-preview-img {
+    width: 120px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #334155;
+}
+
+.slider-edit-img {
+    max-width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    margin-bottom: 15px;
+}
+
+/* Badges y Acciones */
+.slider-link {
+    color: #38bdf8;
+    font-size: 0.85rem;
+    text-decoration: none;
+}
+
+.slider-link:hover {
+    text-decoration: underline;
+}
+
+.slider-badge-active {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    background-color: #064e3b;
+    color: #34d399;
+}
+
+.slider-badge-inactive {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    background-color: #7f1d1d;
+    color: #f87171;
+}
+
+.slider-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.slider-btn-edit {
+    color: #fbbf24;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.slider-btn-delete {
+    background: none;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    text-decoration: underline;
+    font-weight: 500;
+    padding: 0;
+}
+
+.slider-empty {
+    text-align: center;
+    padding: 30px;
+    color: #64748b;
+}
+
+/* Helpers para centrar la vista de edición */
+.slider-edit-layout {
+    display: flex;
+    justify-content: center;
+}
+
+.slider-edit-card {
+    width: 100%;
+    max-width: 600px;
+}
+
+.slider-edit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.slider-edit-title {
+    margin-bottom: 0;
+}
+
+.slider-back-link {
+    color: #94a3b8;
+    text-decoration: none;
+}
+
+.slider-back-link:hover {
+    color: #fff;
+}
+
+.slider-center-text {
+    text-align: center;
+}
+
+/* =========================================
+   VISTA SHOW (DETALLES DEL BANNER)
+   ========================================= */
+.slider-show-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.slider-show-title {
+    margin: 0;
+}
+
+.slider-show-preview {
+    margin-bottom: 30px;
+}
+
+.slider-show-preview-label {
+    margin-bottom: 10px;
+}
+
+.slider-show-image {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid #1e293b;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.slider-show-card {
+    background-color: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 25px;
+}
+
+.slider-show-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.slider-show-full-col {
+    grid-column: span 2;
+}
+
+.slider-show-label {
+    color: #94a3b8;
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+}
+
+.slider-show-value {
+    color: #f8fafc;
+    font-weight: 500;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.slider-show-value-empty {
+    color: #64748b;
+    margin: 0;
+    font-style: italic;
+}
+
+.slider-show-link {
+    color: #38bdf8;
+    text-decoration: none;
+    word-break: break-all;
+    transition: color 0.3s;
+}
+
+.slider-show-link:hover {
+    color: #7dd3fc;
+    text-decoration: underline;
+}
+
+.slider-show-link-icon {
+    font-size: 0.8rem;
+    margin-left: 5px;
+}
+
+.slider-show-badge-wrapper {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.slider-show-actions {
+    margin-top: 30px;
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    padding-top: 20px;
+    border-top: 1px solid #1e293b;
+}
+
+.slider-show-btn-edit {
+    text-decoration: none;
+    padding: 10px 25px;
+    border-radius: 6px;
+}

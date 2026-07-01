@@ -34,9 +34,32 @@ class ElementoCarrito extends Model
 
     public function getPrecioUnitarioRealAttribute()
     {
-        return $this->variante->precio_real;
+        $variante = $this->variante;
+        if (!$variante)
+            return 0;
+
+        // Obtenemos el producto padre a través de la variante
+        $producto = $variante->producto;
+
+        // Obtenemos el precio base de la variante
+        $precioBase = $variante->precio_real;
+
+        // Si el producto tiene una promoción activa, calculamos el precio final
+        if ($producto && $producto->promocion_activa) {
+            $promo = $producto->promocion_activa;
+
+            if ($promo->tipo_descuento === 'porcentaje') {
+                $descuento = $precioBase * ($promo->valor_descuento / 100);
+                return max(0, $precioBase - $descuento);
+            }
+
+            // Si es monto fijo
+            return max(0, $precioBase - $promo->valor_descuento);
+        }
+
+        return $precioBase;
     }
-    
+
     public function getLimiteMaximoAttribute()
     {
         return min($this->variante->stock, 10);

@@ -8,10 +8,12 @@ class Pedido extends Model
 {
     protected $table = 'pedidos';
 
+    // Agregamos 'referencia' al fillable
     protected $fillable = [
         'cliente_id',
         'numero_pedido',
         'direccion_envio',
+        'referencia',
         'total',
         'estado',
     ];

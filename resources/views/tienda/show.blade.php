@@ -49,15 +49,31 @@
                     <span class="pdp-brand">Marca: {{ $producto->marca ?? 'Genérica' }}</span>
                     <h1 class="pdp-title">{{ $producto->nombre }}</h1>
 
-                    <div class="pdp-price-container">
-                        <span class="pdp-price" id="precioDisplay">
-                            S/ {{ number_format($producto->variante_por_defecto->precio_real, 2) }}
-                        </span>
+                    <div class="pdp-price-container" id="precioContainer">
+                        @if ($producto->promocion_activa)
+                            <div class="pdp-prices">
+                                <del class="pdp-price-old" id="precioOriginalDisplay">S/
+                                    {{ number_format($producto->precio_original, 2) }}</del>
+                                <span class="pdp-price pdp-price--discount" id="precioDisplay">S/
+                                    {{ number_format($producto->precio_final, 2) }}</span>
+                                <span class="pdp-promo-badge" id="promoBadge">
+                                    @if ($producto->promocion_activa->tipo_descuento === 'porcentaje')
+                                        -{{ number_format($producto->promocion_activa->valor_descuento, 0) }}% OFF
+                                    @else
+                                        - S/ {{ number_format($producto->promocion_activa->valor_descuento, 2) }}
+                                    @endif
+                                </span>
+                            </div>
+                        @else
+                            <span class="pdp-price" id="precioDisplay">
+                                S/ {{ number_format($producto->precio_original, 2) }}
+                            </span>
+                        @endif
                     </div>
 
                     <div id="productData" data-producto-id="{{ $producto->id }}"
-                        data-variantes="{{ $producto->variantes->toJson() }}"></div>
-
+                        data-variantes="{{ $producto->variantes_para_js->toJson() }}">
+                    </div>
                     <div class="pdp-variants-container">
                         <h3 class="pdp-variants-title">Opciones disponibles: <span id="opcionSeleccionadaText"
                                 style="color: var(--teal); font-weight: normal;">{{ $producto->variante_por_defecto->color }}</span>

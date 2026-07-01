@@ -29,4 +29,10 @@ class Categoria extends Model
     {
         return $this->hasMany(Producto::class, 'categoria_id', 'id');
     }
+
+    // Relación: Una categoría puede estar en muchas promociones
+    public function promociones()
+    {
+        return $this->belongsToMany(Promocion::class, 'categoria_promocion', 'categoria_id', 'promocion_id');
+    }
 }

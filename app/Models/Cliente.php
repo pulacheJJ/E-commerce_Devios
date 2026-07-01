@@ -3,16 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
 class Cliente extends Model
 {
     protected $table = 'clientes';
-
     protected $fillable = [
-        'nombre',
+        'nombres',
+        'apellidos',
         'email',
         'telefono',
-        'direccion_predetermada',
+        'tipo_documento',
+        'numero_documento',
+        'direccion_predeterminada',
     ];
 
     // Relación: Un cliente puede tener muchos pedidos históricos

@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const thumbnails = document.querySelectorAll('.pdp-thumb');
 
     thumbnails.forEach(thumb => {
-        thumb.addEventListener('mouseenter', function() { 
+        thumb.addEventListener('mouseenter', function () {
             thumbnails.forEach(t => t.classList.remove('active'));
             this.classList.add('active');
             imagenPrincipal.src = this.getAttribute('data-src');
@@ -30,10 +30,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const variantes = JSON.parse(productDataElement.getAttribute('data-variantes'));
 
         // VALIDACIÓN EN VIVO: Si el cliente escribe un número mayor
-        cantidadInput.addEventListener('input', function() {
+        cantidadInput.addEventListener('input', function () {
             errorCantidad.textContent = ''; // Limpiamos el error
             const max = parseInt(this.max);
-            
+
             if (parseInt(this.value) > max) {
                 errorCantidad.textContent = `El límite es de ${max} unidades para este producto.`;
                 this.value = max; // Auto-corrige el input
@@ -41,39 +41,60 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         variantPills.forEach(pill => {
-            pill.addEventListener('click', function() {
-                if(this.classList.contains('disabled')) return;
+            pill.addEventListener('click', function () {
+                if (this.classList.contains('disabled')) return;
 
                 variantPills.forEach(p => p.classList.remove('active'));
                 this.classList.add('active');
-                errorCantidad.textContent = ''; // Limpiar errores al cambiar opción
+                errorCantidad.textContent = '';
 
                 const varianteId = parseInt(this.getAttribute('data-id'));
                 const varianteSeleccionada = variantes.find(v => v.id === varianteId);
 
                 if (varianteSeleccionada) {
                     opcionSeleccionadaText.textContent = varianteSeleccionada.color;
-                    const precioReal = parseFloat(varianteSeleccionada.precio_oferta || varianteSeleccionada.precio);
-                    precioDisplay.textContent = `S/ ${precioReal.toFixed(2)}`;
 
-                    const stock = varianteSeleccionada.stock;
-                    
+                    // --- ACTUALIZACIÓN DE PRECIOS SIN NaN ---
+                    const precioDisplay = document.getElementById('precioDisplay');
+                    const precioOriginalDisplay = document.getElementById('precioOriginalDisplay');
+                    const promoBadge = document.getElementById('promoBadge');
+
+                    // Actualizamos precio principal (final)
+                    if (precioDisplay) {
+                        precioDisplay.textContent = `S/ ${parseFloat(varianteSeleccionada.precio_final).toFixed(2)}`;
+                    }
+
+                    // Actualizamos precio tachado si existe
+                    if (precioOriginalDisplay) {
+                        precioOriginalDisplay.textContent = `S/ ${parseFloat(varianteSeleccionada.precio_original).toFixed(2)}`;
+                    }
+
+                    // Actualizamos la etiqueta de descuento (badge)
+                    if (promoBadge) {
+                        if (varianteSeleccionada.hay_descuento) {
+                            promoBadge.textContent = varianteSeleccionada.descuento_info;
+                            promoBadge.style.display = 'inline-block';
+                        } else {
+                            promoBadge.style.display = 'none';
+                        }
+                    }
+
                     // Lógica Visual de Stock
+                    const stock = varianteSeleccionada.stock;
                     if (stock === 0) {
                         stockDisplay.textContent = 'Sin stock';
                         cantidadInput.disabled = true;
                         cantidadInput.value = 1;
                         btnAgregarCarrito.disabled = true;
                     } else {
-                        stockDisplay.textContent = ''; // Ya no mostramos el "(8 disponibles)"
+                        stockDisplay.textContent = '';
                         cantidadInput.disabled = false;
-                        
-                        // El máximo es el stock o 10
+
                         const limite = Math.min(stock, 10);
                         cantidadInput.max = limite;
-                        
+
                         if (parseInt(cantidadInput.value) > limite) {
-                            cantidadInput.value = limite; 
+                            cantidadInput.value = limite;
                         }
 
                         btnAgregarCarrito.disabled = false;
@@ -90,42 +111,48 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalCarrito = document.getElementById('modalCarrito');
     const btnCerrarModal = document.getElementById('btnCerrarModal');
     const btnSeguirComprando = document.getElementById('btnSeguirComprando');
+    const btnComprarAhora = document.getElementById('btnComprarAhora'); // El nuevo botón
 
-    if (btnAgregarCarrito && productDataElement) {
-        btnAgregarCarrito.addEventListener('click', async function() {
-            const varianteActiva = document.querySelector('.variant-pill.active');
-            
-            if (!varianteActiva) {
-                errorCantidad.textContent = 'Por favor, selecciona una opción válida.';
-                return;
-            }
+    // Función unificada para no repetir código (DRY)
+    async function procesarAccionCarrito(btnElement, esCompraRapida = false) {
+        const varianteActiva = document.querySelector('.variant-pill.active');
 
-            const productoId = productDataElement.getAttribute('data-producto-id');
-            const varianteId = varianteActiva.getAttribute('data-id');
-            const cantidad = cantidadInput.value;
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        if (!varianteActiva) {
+            errorCantidad.textContent = 'Por favor, selecciona una opción válida.';
+            return;
+        }
 
-            errorCantidad.textContent = ''; // Limpiar errores previos
-            const textoOriginal = this.textContent;
-            this.textContent = 'Agregando...';
-            this.disabled = true;
+        const productoId = productDataElement.getAttribute('data-producto-id');
+        const varianteId = varianteActiva.getAttribute('data-id');
+        const cantidad = cantidadInput.value;
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-            try {
-                const response = await fetch('/carrito/agregar', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({ producto_id: productoId, variante_id: varianteId, cantidad: cantidad })
-                });
+        errorCantidad.textContent = '';
+        const textoOriginal = btnElement.textContent;
+        btnElement.textContent = esCompraRapida ? 'Redirigiendo...' : 'Agregando...';
+        btnElement.disabled = true;
 
-                const data = await response.json();
+        try {
+            const response = await fetch('/carrito/agregar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ producto_id: productoId, variante_id: varianteId, cantidad: cantidad })
+            });
 
-                if (response.ok && data.status === 'success') {
-                    this.textContent = textoOriginal;
-                    this.disabled = false;
+            const data = await response.json();
+
+            if (response.ok && data.status === 'success') {
+                if (esCompraRapida) {
+                    // Si es compra rápida, lo mandamos directo a la caja
+                    window.location.href = '/checkout';
+                } else {
+                    // Si es agregar normal, restauramos el botón y mostramos el modal
+                    btnElement.textContent = textoOriginal;
+                    btnElement.disabled = false;
 
                     document.getElementById('modalImagen').src = imagenPrincipal.src;
                     document.getElementById('modalVariante').textContent = 'Opción: ' + varianteActiva.querySelector('strong').textContent;
@@ -133,18 +160,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('modalCantidad').textContent = cantidad;
 
                     modalCarrito.classList.add('active');
-                } else {
-                    // AQUÍ ESTÁ LA MAGIA: Imprime el error del backend al costado del input
-                    errorCantidad.textContent = data.message || 'Error al agregar';
-                    this.textContent = textoOriginal;
-                    this.disabled = false;
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                errorCantidad.textContent = 'Ocurrió un error de conexión.';
-                this.textContent = textoOriginal;
-                this.disabled = false;
+            } else {
+                errorCantidad.textContent = data.message || 'Error al procesar';
+                btnElement.textContent = textoOriginal;
+                btnElement.disabled = false;
             }
+        } catch (error) {
+            console.error('Error:', error);
+            errorCantidad.textContent = 'Ocurrió un error de conexión.';
+            btnElement.textContent = textoOriginal;
+            btnElement.disabled = false;
+        }
+    }
+
+    // Asignamos los eventos a ambos botones
+    if (btnAgregarCarrito && productDataElement) {
+        btnAgregarCarrito.addEventListener('click', function () {
+            procesarAccionCarrito(this, false); // false = Mostrar modal
+        });
+    }
+
+    if (btnComprarAhora && productDataElement) {
+        btnComprarAhora.addEventListener('click', function () {
+            procesarAccionCarrito(this, true); // true = Redirigir al checkout
         });
     }
 

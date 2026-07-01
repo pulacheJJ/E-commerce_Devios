@@ -1,0 +1,183 @@
+/* =========================================
+   FOOTER DEVIOZ S.A.C. - UI/UX PRO
+   ========================================= */
+.store-footer {
+    background-color: #0b1120;
+    color: #94a3b8;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    border-top: 4px solid var(--teal, #0f766e);
+}
+
+/* --- Pre-Footer: Trust Badges --- */
+.footer-trust-badges {
+    background-color: #0f172a;
+    padding: 2rem 0;
+    border-bottom: 1px solid #1e293b;
+}
+
+.trust-badges-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 0 20px;
+}
+
+.trust-badge-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.trust-badge-item i {
+    font-size: 2rem;
+    color: var(--teal, #2dd4bf);
+}
+
+.trust-badge-content h5 {
+    color: #f8fafc;
+    margin: 0 0 4px 0;
+    font-size: 1.05rem;
+}
+
+.trust-badge-content p {
+    margin: 0;
+    font-size: 0.85rem;
+}
+
+/* --- Footer Principal --- */
+.footer-main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 4rem 20px;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.5fr;
+    gap: 40px;
+}
+
+.footer-brand .footer-logo {
+    width: 160px;
+    margin-bottom: 1.5rem;
+    filter: drop-shadow(0 0 8px rgba(45, 212, 191, 0.2));
+}
+
+.footer-brand p {
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    max-width: 300px;
+}
+
+/* Redes Sociales como en la imagen */
+.footer-social {
+    display: flex;
+    gap: 15px;
+}
+
+.footer-social a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    background-color: #1e293b;
+    color: #f8fafc;
+    border-radius: 50%;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: 1.2rem;
+}
+
+.footer-social a:hover {
+    background-color: var(--teal, #2dd4bf);
+    color: #0b1120;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(45, 212, 191, 0.4);
+}
+
+.footer-col h4 {
+    color: #f8fafc;
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.footer-col h4::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 40px;
+    height: 2px;
+    background-color: var(--teal, #2dd4bf);
+}
+
+.footer-col ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-col ul li {
+    margin-bottom: 12px;
+}
+
+.footer-col ul li a {
+    color: #94a3b8;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+.footer-col ul li a:hover {
+    color: var(--teal, #2dd4bf);
+    transform: translateX(5px);
+}
+
+.footer-contact-info p {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+.footer-contact-info i {
+    color: var(--teal, #2dd4bf);
+    margin-top: 4px;
+}
+
+/* --- Footer Bottom (Copyright & Pagos) --- */
+.footer-bottom {
+    background-color: #020617;
+    padding: 1.5rem 20px;
+    text-align: center;
+}
+
+.footer-bottom-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.footer-payments {
+    display: flex;
+    gap: 10px;
+    font-size: 1.5rem;
+    color: #64748b;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .footer-main { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 576px) {
+    .footer-main { grid-template-columns: 1fr; }
+    .footer-bottom-content { flex-direction: column; justify-content: center; }
+}

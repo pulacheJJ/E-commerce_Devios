@@ -1,19 +1,25 @@
 @props(['producto'])
 
 @php
-    // Lógica para imagen y precio delegada al componente
-    $imagenPrincipal = $producto->imagenes->where('es_principal', true)->first() ?? $producto->imagenes->first();
-
-    $precioMinimo = $producto->variantes->min(function ($v) {
-        return $v->precio_oferta ? $v->precio_oferta : $v->precio;
-    });
+    // Solo extraemos la promoción activa para usarla más fácil en la vista
+    $promo = $producto->promocion_activa;
 @endphp
 
 <article class="product-card">
     <a href="{{ route('tienda.producto', $producto->slug) }}" class="product-card__image-wrapper">
-        @if ($imagenPrincipal)
-            <img src="{{ asset('storage/' . $imagenPrincipal->ruta_imagen) }}" alt="{{ $producto->nombre }}"
-                class="product-card__image">
+        
+        @if ($promo)
+            <span class="product-card__promo-badge">
+                @if ($promo->tipo_descuento === 'porcentaje')
+                    -{{ number_format($promo->valor_descuento, 0) }}% OFF
+                @else
+                    - S/ {{ number_format($promo->valor_descuento, 2) }}
+                @endif
+            </span>
+        @endif
+
+        @if ($producto->imagen_principal)
+            <img src="{{ asset('storage/' . $producto->imagen_principal) }}" alt="{{ $producto->nombre }}" class="product-card__image">
         @else
             <div class="product-card__no-image">Sin imagen</div>
         @endif
@@ -28,13 +34,21 @@
 
         <div class="product-card__price-box">
             @if ($producto->variantes->count() > 0)
-                <span class="product-card__price">Desde S/ {{ number_format($precioMinimo, 2) }}</span>
+                
+                @if ($promo)
+                    <div class="product-card__prices">
+                        <del class="product-card__price-old">S/ {{ number_format($producto->precio_original, 2) }}</del>
+                        <span class="product-card__price product-card__price--discount">S/ {{ number_format($producto->precio_final, 2) }}</span>
+                    </div>
+                @else
+                    <span class="product-card__price">Desde S/ {{ number_format($producto->precio_original, 2) }}</span>
+                @endif
+
             @else
                 <span class="product-card__out-of-stock">Agotado temporalmente</span>
             @endif
         </div>
 
-        <a href="{{ route('tienda.producto', $producto->slug) }}" class="btn btn--primary product-card__btn">Ver
-            Opciones</a>
+        <a href="{{ route('tienda.producto', $producto->slug) }}" class="btn btn--primary product-card__btn">Ver Opciones</a>
     </div>
 </article>

@@ -16,7 +16,8 @@
     <div class="admin-layout">
         <aside class="sidebar">
             <div class="sidebar__logo">
-                <h2>DEVIOZ<span>.</span></h2>
+                <img src="{{ asset('img/logo-devioz.webp') }}" alt="DEVIOZ Logo" class="logo-img">
+                
             </div>
             <nav class="sidebar__nav">
                 <a href="{{ route('admin.dashboard') }}"
@@ -30,6 +31,15 @@
                 <a href="{{ route('admin.productos.index') }}"
                     class="{{ request()->routeIs('admin.productos.*') ? 'active' : '' }}">
                     <i class="fas fa-box"></i> Productos
+                </a>
+                <a href="{{ route('admin.sliders.index') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.sliders.*') ? 'active' : '' }}">
+                    <i class="fas fa-images"></i>
+                    <span>Banners / Slider</span>
+                </a>
+                <a href="{{ route('admin.promociones.index') }}"
+                    class="{{ request()->routeIs('admin.promociones.*') ? 'active' : '' }}">
+                    <i class="fas fa-percent"></i> Promociones
                 </a>
                 <hr>
                 <a href="{{ route('tienda.catalogo') }}" target="_blank" class="nav-link">

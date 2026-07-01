@@ -55,7 +55,18 @@ class CategoriaService
         // 4. REGLA DE NEGOCIO: Apagado en cascada
         // Si se desactiva un Padre, desactivamos a sus hijos
         if ($nuevoEstado === false) {
-            $categoria->hijos()->update(['esta_activa' => false]);
+            // A. Desactivar todos los productos directos de ESTA categoría
+            $categoria->productos()->update(['esta_activo' => false]);
+
+            // B. Si es una categoría padre, también desactivar sus hijas y los productos de las hijas
+            if ($categoria->hijos()->count() > 0) {
+                // Primero apagamos los productos de las subcategorías
+                foreach ($categoria->hijos as $hijo) {
+                    $hijo->productos()->update(['esta_activo' => false]);
+                }
+                // Luego apagamos las subcategorías en sí
+                $categoria->hijos()->update(['esta_activa' => false]);
+            }
         }
 
         return $guardado;
