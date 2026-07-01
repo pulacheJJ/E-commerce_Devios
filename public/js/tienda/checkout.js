@@ -49,10 +49,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (e.target.value === 'retiro') {
                     boxDireccionResumen.style.display = 'none';
-                    hDir.value = 'RETIRO EN TIENDA PIURA MALL';
-                    hDep.value = 'Piura';
-                    hProv.value = 'Piura';
-                    hDist.value = 'Castilla';
+                    hDir.value = 'RETIRO EN TIENDA DEVIOZ ';
+                    hDep.value = '';
+                    hProv.value = '';
+                    hDist.value = '';
                 } else {
                     boxDireccionResumen.style.display = 'flex';
                     hDir.value = txtDir.value; // Restaura si había algo guardado

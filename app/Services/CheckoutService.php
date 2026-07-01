@@ -160,7 +160,8 @@ class CheckoutService
     {
         Direccion::create([
             'cliente_id' => $clienteId,
-            'distrito_id' => $datos['distrito'],
+            // Si no viene distrito (porque es retiro), le ponemos '150101' (Lima Centro)
+            'distrito_id' => $datos['distrito'] ?? '150101',
             'direccion_exacta' => $datos['direccion_envio'],
             'referencia' => $datos['referencia'] ?? null,
             'is_predeterminada' => true

@@ -21,7 +21,9 @@ class StoreCheckoutRequest extends FormRequest
             'documento'       => 'required|string|max:20',
             'direccion_envio' => 'required|string|max:255',
             'referencia'      => 'nullable|string|max:255',
-            'distrito'        => 'required|string|size:6',
+            'metodo_entrega'  => 'required|in:retiro,domicilio',
+            'distrito'        => 'required_if:metodo_entrega,domicilio|nullable|string|size:6',
+
         ];
     }
 
