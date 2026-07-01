@@ -21,7 +21,7 @@ class CarritoService
         $carrito = $this->obtenerOCrearCarrito();
         $elemento = $this->obtenerElemento($carrito->id, $varianteId);
 
-        $nuevaCantidad = ($elemento ? $elemento->cantidad : 0) + $cantidad;
+        $nuevaCantidad = $cantidad;
 
         // Delegamos la validación a la regla de negocio
         $validacion = $this->validarLimites($varianteId, $nuevaCantidad);

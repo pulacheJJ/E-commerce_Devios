@@ -114,13 +114,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnComprarAhora = document.getElementById('btnComprarAhora'); // El nuevo botón
 
     // Función unificada para no repetir código (DRY)
+    // 1. CREAMOS LA VARIABLE GLOBAL FUERA DE LA FUNCIÓN
+    let isProcessing = false;
+
     async function procesarAccionCarrito(btnElement, esCompraRapida = false) {
+        // 2. CANDADO DE ENTRADA: Si ya se está procesando una petición, bloqueamos esta.
+        if (isProcessing) {
+            console.warn("Petición bloqueada: Ya se está procesando un producto.");
+            return;
+        }
+
         const varianteActiva = document.querySelector('.variant-pill.active');
 
         if (!varianteActiva) {
             errorCantidad.textContent = 'Por favor, selecciona una opción válida.';
             return;
         }
+
+        // 3. CERRAMOS EL CANDADO: Indicamos que empezó el proceso
+        isProcessing = true;
 
         const productoId = productDataElement.getAttribute('data-producto-id');
         const varianteId = varianteActiva.getAttribute('data-id');
@@ -171,6 +183,9 @@ document.addEventListener('DOMContentLoaded', () => {
             errorCantidad.textContent = 'Ocurrió un error de conexión.';
             btnElement.textContent = textoOriginal;
             btnElement.disabled = false;
+        } finally {
+            // 4. ABRIMOS EL CANDADO SIEMPRE: Pase lo que pase (éxito o error), liberamos el proceso
+            isProcessing = false;
         }
     }
 
