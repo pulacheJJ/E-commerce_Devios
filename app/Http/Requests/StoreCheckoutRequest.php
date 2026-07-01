@@ -21,7 +21,7 @@ class StoreCheckoutRequest extends FormRequest
             'documento'       => 'required|string|max:20',
             'direccion_envio' => 'required|string|max:255',
             'referencia'      => 'nullable|string|max:255',
-            // ¡ELIMINAMOS 'metodo_pago' de aquí porque eso ahora es en el Paso 3!
+            'distrito'        => 'required|string|size:6',
         ];
     }
 

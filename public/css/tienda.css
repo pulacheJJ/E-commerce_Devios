@@ -1,3 +1,4 @@
+@import url('tienda/modal-direccion.css');
 @import url('tienda/header.css');
 @import url('tienda/slider.css');
 @import url('tienda/footer.css'); 
@@ -1486,7 +1487,7 @@ body {
 }
 
 /* =========================================
-   CHECKOUT WIZARD (ESTILO FALABELLA)
+   CHECKOUT WIZARD 
    ========================================= */
 .checkout-stepper {
     display: flex;
@@ -1625,82 +1626,6 @@ body {
     background-size: 1em;
     padding-right: 2.5rem;
 }
-
-/* =========================================
-   MODAL DE DIRECCIÓN
-   ========================================= */
-.address-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(15, 23, 42, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    opacity: 0;
-    visibility: hidden;
-    transition: 0.3s ease;
-}
-
-.address-modal-overlay.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-.address-modal-content {
-    background: var(--bg2);
-    width: 100%;
-    max-width: 450px;
-    border-radius: 12px;
-    border: 1px solid #1e293b;
-    display: flex;
-    flex-direction: column;
-    max-height: 90vh;
-    transform: translateY(20px);
-    transition: 0.3s ease;
-}
-
-.address-modal-overlay.active .address-modal-content {
-    transform: translateY(0);
-}
-
-.address-modal-header {
-    padding: 20px;
-    border-bottom: 1px solid #1e293b;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.address-modal-header h3 {
-    margin: 0;
-    color: var(--ink);
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-.btn-close-modal {
-    background: none;
-    border: none;
-    color: #94a3b8;
-    font-size: 1.2rem;
-    cursor: pointer;
-}
-
-.address-modal-body {
-    padding: 20px;
-    overflow-y: auto;
-}
-
-.address-modal-footer {
-    padding: 20px;
-    border-top: 1px solid #1e293b;
-}
-
 /* =========================================
    CLASES ESPECÍFICAS PARA PAGO (PASO 3)
    ========================================= */

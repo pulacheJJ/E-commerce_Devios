@@ -35,14 +35,14 @@ class CarritoController extends Controller
         // Si excede el stock o límite, devolvemos error 422 para que el JS lance el alert
         if (!$resultado['success']) {
             return response()->json([
-                'status'  => 'error',
+                'status' => 'error',
                 'message' => $resultado['message']
             ], 422);
         }
 
         return response()->json([
-            'status'      => 'success',
-            'mensaje'     => 'Producto agregado al carrito',
+            'status' => 'success',
+            'mensaje' => 'Producto agregado al carrito',
             'total_items' => $resultado['total_items']
         ]);
     }
@@ -55,12 +55,12 @@ class CarritoController extends Controller
         $request->validate([
             'cantidad' => 'required|integer|min:1'
         ]);
-        
+
         $resultado = $this->carritoService->actualizarCantidad($id, $request->cantidad);
 
         if (!$resultado['success']) {
             return response()->json([
-                'status'  => 'error', 
+                'status' => 'error',
                 'message' => $resultado['message']
             ], 422);
         }
@@ -76,7 +76,7 @@ class CarritoController extends Controller
         $this->carritoService->eliminarItem($id);
 
         return response()->json([
-            'status'  => 'success',
+            'status' => 'success',
             'mensaje' => 'Producto removido del carrito'
         ]);
     }

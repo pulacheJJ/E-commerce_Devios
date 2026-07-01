@@ -6,6 +6,7 @@ use App\Models\Cliente;
 use App\Models\Pedido;
 use App\Models\DetallePedido;
 use App\Models\Pago;
+use App\Models\Direccion;
 use App\Models\Carrito;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -22,7 +23,7 @@ class CheckoutService
     }
 
     /* =========================================================
-       MÉTODOS PÚBLICOS (Orquestadores de Casos de Uso)
+       MÉTODOS PÚBLICOS 
        ========================================================= */
 
     /**
@@ -44,6 +45,19 @@ class CheckoutService
      */
     public function procesarCompra(array $datosValidados): Pedido
     {
+        // 1. Buscamos primero si ya existe un pedido pendiente para este email
+        // Esto evita que una petición duplicada falle si la primera ya tuvo éxito.
+        $cliente = Cliente::where('email', $datosValidados['email'])->first();
+        if ($cliente) {
+            $pedidoExistente = Pedido::where('cliente_id', $cliente->id)
+                ->where('estado', 'pendiente')
+                ->latest()
+                ->first();
+            if ($pedidoExistente) {
+                return $pedidoExistente; // Retornamos el pedido existente en lugar de lanzar error
+            }
+        }
+        // 2. Si no existe, procedemos con la lógica normal
         $carrito = $this->carritoService->obtenerCarritoActual();
 
         if (!$carrito || $carrito->elementos->count() === 0) {
@@ -51,13 +65,11 @@ class CheckoutService
         }
 
         return DB::transaction(function () use ($datosValidados, $carrito) {
-
             $cliente = $this->guardarCliente($datosValidados);
+            $this->guardarDireccion($cliente->id, $datosValidados);
             $pedido = $this->generarPedido($cliente->id, $datosValidados, $carrito->total);
-
             $this->procesarDetallesYStock($pedido->id, $carrito);
             $this->limpiarCarrito($carrito);
-
             return $pedido;
         });
     }
@@ -87,7 +99,7 @@ class CheckoutService
     }
 
     /* =========================================================
-       MÉTODOS PRIVADOS (Responsabilidades Aisladas - SRP)
+       MÉTODOS PRIVADOS 
        ========================================================= */
 
     private function guardarCliente(array $datos): Cliente
@@ -100,7 +112,6 @@ class CheckoutService
                 'telefono' => $datos['telefono'],
                 'tipo_documento' => 'DNI',
                 'numero_documento' => $datos['documento'],
-                'direccion_predeterminada' => $datos['direccion_envio']
             ]
         );
     }
@@ -142,5 +153,17 @@ class CheckoutService
         $carrito->elementos()->delete();
         $carrito->delete();
         session()->forget('carrito_token');
+    }
+
+
+    private function guardarDireccion(int $clienteId, array $datos): void
+    {
+        Direccion::create([
+            'cliente_id' => $clienteId,
+            'distrito_id' => $datos['distrito'],
+            'direccion_exacta' => $datos['direccion_envio'],
+            'referencia' => $datos['referencia'] ?? null,
+            'is_predeterminada' => true
+        ]);
     }
 }
