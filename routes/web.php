@@ -9,9 +9,10 @@ use App\Http\Controllers\CarritoController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Admin\SliderController;
 use App\Http\Controllers\Admin\PromocionController;
+use App\Http\Controllers\Admin\AuthController;
 
 // ==========================================
-// RUTAS PÚBLICAS (Frontend / Tienda)
+// RUTAS PÚBLICAS Tienda
 // ==========================================
 
 // 1. LA TIENDA (Público) - Catálogo directo en la raíz
@@ -37,8 +38,13 @@ Route::get('/promocion/{id}', [TiendaController::class, 'promocion'])->name('tie
 // ==========================================
 // RUTAS ADMINISTRATIVAS (Backoffice)
 // ==========================================
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Agregamos 'role:admin' para que solo los administradores puedan acceder
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
+    
     // Inicio del Panel (Dashboard)
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -52,7 +58,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Módulo de Sliders
     Route::resource('sliders', SliderController::class);
-    
+
     // Módulo de Promociones
     Route::patch('promociones/{promocione}/toggle', [PromocionController::class, 'toggle'])->name('promociones.toggle');
     Route::resource('promociones', PromocionController::class);
