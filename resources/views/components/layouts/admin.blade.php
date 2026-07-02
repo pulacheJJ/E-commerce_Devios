@@ -17,7 +17,7 @@
         <aside class="sidebar">
             <div class="sidebar__logo">
                 <img src="{{ asset('img/logo-devioz.webp') }}" alt="DEVIOZ Logo" class="logo-img">
-                
+
             </div>
             <nav class="sidebar__nav">
                 <a href="{{ route('admin.dashboard') }}"
@@ -41,11 +41,25 @@
                     class="{{ request()->routeIs('admin.promociones.*') ? 'active' : '' }}">
                     <i class="fas fa-percent"></i> Promociones
                 </a>
+                <a href="{{ route('admin.usuarios.index') }}"
+                    class="{{ request()->routeIs('admin.usuarios.*') ? 'active' : '' }}">
+                    <i class="fas fa-users"></i> Usuarios
+                </a>
                 <hr>
                 <a href="{{ route('tienda.inicio') }}" target="_blank" class="nav-link">
                     <i class="fas fa-store"></i>
                     Ver Tienda
                 </a>
+
+                <div class="logout-container">
+                    <form action="{{ route('logout') }}" method="POST" id="formLogout">
+                        @csrf
+                        <button type="submit" class="btn-logout" title="Cerrar sesión de forma segura">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Cerrar Sesión</span>
+                        </button>
+                    </form>
+                </div>
             </nav>
         </aside>
 
@@ -65,6 +79,7 @@
     </div>
 
     {{ $js ?? '' }}
+    <script src="{{ asset('js/admin/admin.js') }}"></script>
 </body>
 
 </html>

@@ -1,5 +1,7 @@
 @import url('admin/sliders.css');
 @import url('admin/promociones.css');
+@import url('admin/usuarios.css');
+
 :root {
     --bg: #06121a;
     --bg2: #0a1b26;
@@ -40,17 +42,20 @@ body {
     height: 100vh;
     box-sizing: border-box;
 }
+
 /*LOGO */
 .sidebar__logo {
     display: flex;
     align-items: center;
 }
+
 .sidebar__logo a {
     display: block;
 }
+
 .sidebar__logo .logo-img {
-    height: 40px; 
-    width: auto;  
+    height: 40px;
+    width: auto;
     object-fit: contain;
     display: block;
 }
@@ -498,12 +503,58 @@ h6 {
     display: flex;
     align-items: center;
 }
+
 .sidebar__logo a {
     display: block;
 }
+
 .sidebar__logo .logo-img {
-    height: 40px; 
-    width: auto;  
+    height: 40px;
+    width: auto;
     object-fit: contain;
     display: block;
+}
+
+/*Cerrar Sesion*/
+/* Estilos para el botón de Logout */
+.logout-container {
+    margin-top: auto;
+    /* Ideal si está al final de un sidebar flexbox */
+    padding: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    /* Separador sutil */
+}
+
+.btn-logout {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background-color: transparent;
+    color: #ef4444;
+    /* Rojo para indicar una acción de salida/peligro */
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.btn-logout i {
+    font-size: 1.1rem;
+}
+
+/* Efecto hover: fondo rojo suave y borde */
+.btn-logout:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+}
+
+/* Efecto al hacer clic */
+.btn-logout:active {
+    transform: scale(0.98);
 }

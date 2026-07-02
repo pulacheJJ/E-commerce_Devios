@@ -63,4 +63,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::patch('promociones/{promocione}/toggle', [PromocionController::class, 'toggle'])->name('promociones.toggle');
     Route::resource('promociones', PromocionController::class);
 
+    // Módulo de Usuarios
+    Route::patch('usuarios/{usuario}/toggle', [App\Http\Controllers\Admin\UserController::class, 'toggle'])->name('usuarios.toggle');
+    Route::resource('usuarios', App\Http\Controllers\Admin\UserController::class);
+
 });
