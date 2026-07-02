@@ -24,7 +24,7 @@ class TiendaController extends Controller
         $categoriasPadre = $this->catalogoService->obtenerCategoriasPadreConConteo($filtros);
         $marcas = $this->catalogoService->obtenerMarcasActivas($filtros);
         $slides = $this->catalogoService->obtenerSlidesHero();
-        return view('tienda.catalogo', compact('productos', 'categoriasPadre', 'marcas', 'slides'));
+        return view('tienda.inicio', compact('productos', 'categoriasPadre', 'marcas', 'slides'));
     }
 
     // Añade este método debajo de tu método index()
@@ -46,7 +46,7 @@ class TiendaController extends Controller
 
         $slides = collect();
 
-        return view('tienda.catalogo', compact('productos', 'categoriasPadre', 'marcas', 'slides', 'promocion'));
+        return view('tienda.inicio', compact('productos', 'categoriasPadre', 'marcas', 'slides', 'promocion'));
     }
     public function show($slug)
     {

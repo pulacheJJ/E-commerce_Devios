@@ -42,7 +42,7 @@
                     <i class="fas fa-percent"></i> Promociones
                 </a>
                 <hr>
-                <a href="{{ route('tienda.catalogo') }}" target="_blank" class="nav-link">
+                <a href="{{ route('tienda.inicio') }}" target="_blank" class="nav-link">
                     <i class="fas fa-store"></i>
                     Ver Tienda
                 </a>

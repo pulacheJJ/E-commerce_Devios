@@ -65,7 +65,7 @@ class CheckoutController extends Controller
         
         // Evitar doble pago si el cliente recarga la página
         if ($pedido->estado === 'pagado') {
-            return redirect()->route('tienda.catalogo')->with('success', 'Este pedido ya fue pagado exitosamente.');
+            return redirect()->route('tienda.inicio')->with('success', 'Este pedido ya fue pagado exitosamente.');
         }
 
         return view('tienda.pago', compact('pedido'));
@@ -83,7 +83,7 @@ class CheckoutController extends Controller
             return response()->json([
                 'status'       => 'success',
                 'message'      => '¡Pago procesado con éxito!',
-                'redirect_url' => route('tienda.catalogo') // Fin del flujo
+                'redirect_url' => route('tienda.inicio') // Fin del flujo
             ]);
         } catch (\Exception $e) {
             return response()->json([

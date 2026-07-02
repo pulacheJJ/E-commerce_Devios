@@ -8,9 +8,9 @@
     <main class="store-container">
 
         <nav class="breadcrumb" style="margin-bottom: 20px; font-size: 0.9rem;">
-            <a href="{{ route('tienda.catalogo') }}" style="color: var(--teal); text-decoration: none;">Catálogo</a>
+            <a href="{{ route('tienda.inicio') }}" style="color: var(--teal); text-decoration: none;">Catálogo</a>
             <span style="color: #64748b; margin: 0 5px;">/</span>
-            <a href="{{ route('tienda.catalogo', ['categoria' => $producto->categoria->slug ?? '']) }}"
+            <a href="{{ route('tienda.inicio', ['categoria' => $producto->categoria->slug ?? '']) }}"
                 style="color: var(--teal); text-decoration: none;">{{ $producto->categoria->nombre ?? 'General' }}</a>
             <span style="color: #64748b; margin: 0 5px;">/</span>
             <span style="color: #94a3b8;">{{ $producto->nombre }}</span>

@@ -11,7 +11,7 @@
             <h1 class="store-header__title" style="text-align: left; margin: 0;">
                 Carro ({{ $carrito ? $carrito->cantidad_total : 0 }} productos)
             </h1>
-            <a href="{{ route('tienda.catalogo') }}"
+            <a href="{{ route('tienda.inicio') }}"
                 style="color: var(--teal); text-decoration: none; font-weight: 600; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
                 <i class="fas fa-arrow-left"></i> Seguir comprando
             </a>
@@ -71,7 +71,7 @@
                     <div class="cart-empty">
                         <i class="fas fa-shopping-cart fa-3x" style="color: #64748b; margin-bottom: 15px;"></i>
                         <h2>Tu carro está vacío</h2>
-                        <a href="{{ route('tienda.catalogo') }}" class="btn btn--primary" style="margin-top: 15px;">Ir
+                        <a href="{{ route('tienda.inicio') }}" class="btn btn--primary" style="margin-top: 15px;">Ir
                             a comprar</a>
                     </div>
                 @endif

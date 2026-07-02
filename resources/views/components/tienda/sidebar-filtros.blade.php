@@ -3,7 +3,7 @@
 <aside class="store-sidebar">
     <h3 class="store-sidebar-title">Filtrar por</h3>
 
-    <form action="{{ route('tienda.catalogo') }}" method="GET" id="storeFiltersForm">
+    <form action="{{ route('tienda.inicio') }}" method="GET" id="storeFiltersForm">
         @if (request('categoria'))
             <input type="hidden" name="categoria" value="{{ request('categoria') }}">
         @endif
