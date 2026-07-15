@@ -2,109 +2,192 @@
 
 namespace App\Services;
 
-use App\Models\Cliente;
-use App\Models\Pedido;
-use App\Models\DetallePedido;
-use App\Models\Pago;
-use App\Models\Direccion;
 use App\Models\Carrito;
+use App\Models\Cliente;
+use App\Models\DetallePedido;
+use App\Models\ElementoCarrito;
+use App\Models\Pago;
+use App\Models\Pedido;
+use App\Models\VarianteProducto;
+use DomainException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Exception;
+use InvalidArgumentException;
 
 class CheckoutService
 {
-    private $carritoService;
-
-    // Inyectamos el servicio del carrito
-    public function __construct(CarritoService $carritoService)
+    public function __construct(private CarritoService $carritoService)
     {
-        $this->carritoService = $carritoService;
     }
 
-    /* =========================================================
-       MÉTODOS PÚBLICOS 
-       ========================================================= */
-
-    /**
-     * Valida y prepara los datos para renderizar la vista de checkout (Paso 2).
-     */
     public function prepararVistaCheckout(): array
     {
         $carrito = $this->carritoService->obtenerCarritoActual();
 
-        if (!$carrito || $carrito->elementos->count() === 0) {
+        if (!$carrito || $carrito->elementos->isEmpty()) {
             return ['es_valido' => false, 'carrito' => null];
         }
 
         return ['es_valido' => true, 'carrito' => $carrito];
     }
 
-    /**
-     * Procesa la orden de compra y reserva el pedido (Paso 2).
-     */
     public function procesarCompra(array $datosValidados): Pedido
     {
-        // 1. Buscamos primero si ya existe un pedido pendiente para este email
-        // Esto evita que una petición duplicada falle si la primera ya tuvo éxito.
-        $cliente = Cliente::where('email', $datosValidados['email'])->first();
-        if ($cliente) {
-            $pedidoExistente = Pedido::where('cliente_id', $cliente->id)
-                ->where('estado', 'pendiente')
-                ->latest()
+        $sessionTokenHash = $this->carritoService->obtenerHashPropietarioActual(true);
+        $carritoActual = $this->carritoService->obtenerCarritoActual();
+
+        if (!$carritoActual && session()->has('last_checkout_order_id')) {
+            $pedidoAnterior = Pedido::whereKey(session()->get('last_checkout_order_id'))
+                ->where('session_token_hash', $sessionTokenHash)
                 ->first();
-            if ($pedidoExistente) {
-                return $pedidoExistente; // Retornamos el pedido existente en lugar de lanzar error
+
+            if ($pedidoAnterior) {
+                return $pedidoAnterior;
             }
         }
-        // 2. Si no existe, procedemos con la lógica normal
-        $carrito = $this->carritoService->obtenerCarritoActual();
 
-        if (!$carrito || $carrito->elementos->count() === 0) {
-            throw new Exception('El carrito está vacío o la sesión expiró.');
+        if (!$carritoActual || !$sessionTokenHash) {
+            throw new DomainException('No existe un carrito válido para esta sesión.');
         }
 
-        return DB::transaction(function () use ($datosValidados, $carrito) {
-            $cliente = $this->guardarCliente($datosValidados);
-            $this->guardarDireccion($cliente->id, $datosValidados);
-            $pedido = $this->generarPedido($cliente->id, $datosValidados, $carrito->total);
-            $this->procesarDetallesYStock($pedido->id, $carrito);
-            $this->limpiarCarrito($carrito);
+        $pedido = DB::transaction(function () use ($datosValidados, $carritoActual, $sessionTokenHash) {
+            $carrito = Carrito::whereKey($carritoActual->id)
+                ->where('token_sesion', $carritoActual->token_sesion)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$carrito) {
+                throw new DomainException('El carrito ya no está disponible.');
+            }
+
+            $pedidoExistente = Pedido::where('carrito_id', $carrito->id)->first();
+
+            if ($pedidoExistente) {
+                if (!hash_equals((string) $pedidoExistente->session_token_hash, $sessionTokenHash)) {
+                    throw new DomainException('El pedido pertenece a otra sesión.');
+                }
+
+                return $pedidoExistente;
+            }
+
+            $elementos = ElementoCarrito::where('carrito_id', $carrito->id)
+                ->orderBy('variante_id')
+                ->get();
+
+            if ($elementos->isEmpty()) {
+                throw new DomainException('El carrito está vacío.');
+            }
+
+            $variantes = VarianteProducto::with([
+                'producto.promociones',
+                'producto.categoria.promociones',
+            ])
+                ->whereIn('id', $elementos->pluck('variante_id'))
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
+
+            $detalles = [];
+            $total = 0.0;
+
+            foreach ($elementos as $item) {
+                $variante = $variantes->get($item->variante_id);
+
+                if (!$variante || !$variante->producto || !$variante->producto->esta_activo) {
+                    throw new DomainException('Uno de los productos ya no está disponible.');
+                }
+
+                if ($variante->stock < $item->cantidad) {
+                    throw new DomainException('El stock disponible cambió. Revisa tu carrito.');
+                }
+
+                $item->setRelation('variante', $variante);
+                $precioUnitario = (float) $item->precio_unitario_real;
+                $total += $precioUnitario * $item->cantidad;
+                $detalles[] = [$item, $variante, $precioUnitario];
+            }
+
+            $cliente = $this->guardarClienteSinSobrescribir($datosValidados);
+            $pedido = $this->generarPedido(
+                $cliente->id,
+                $datosValidados,
+                $carrito,
+                $sessionTokenHash,
+                $total
+            );
+
+            foreach ($detalles as [$item, $variante, $precioUnitario]) {
+                DetallePedido::create([
+                    'pedido_id' => $pedido->id,
+                    'variante_id' => $variante->id,
+                    'cantidad' => $item->cantidad,
+                    'precio_unitario' => $precioUnitario,
+                ]);
+
+                $variante->decrement('stock', $item->cantidad);
+            }
+
+            $carrito->elementos()->delete();
+
             return $pedido;
-        });
+        }, 3);
+
+        session()->put('last_checkout_order_id', $pedido->id);
+        session()->forget('carrito_token');
+
+        return $pedido;
     }
 
     /**
-     * Registra el pago en la base de datos y actualiza el pedido (Paso 3).
+     * Entrada reservada para un webhook de pasarela previamente verificado.
+     * No debe exponerse a una solicitud iniciada por el navegador.
      */
-    public function registrarPago(Pedido $pedido, string $metodoPago): Pago
-    {
-        return DB::transaction(function () use ($pedido, $metodoPago) {
+    public function registrarPagoVerificado(
+        Pedido $pedido,
+        string $metodoPago,
+        string $idTransaccion,
+        array $respuestaPasarela = []
+    ): Pago {
+        if ($idTransaccion === '' || !in_array($metodoPago, ['tarjeta', 'yape', 'plin', 'transferencia'], true)) {
+            throw new InvalidArgumentException('Datos de pago verificado inválidos.');
+        }
 
-            // 1. Crear el registro en la tabla pagos
+        return DB::transaction(function () use ($pedido, $metodoPago, $idTransaccion, $respuestaPasarela) {
+            $pagoExistente = Pago::where('id_transaccion', $idTransaccion)->first();
+
+            if ($pagoExistente) {
+                if ($pagoExistente->pedido_id !== $pedido->id) {
+                    throw new DomainException('La transacción ya está asociada a otro pedido.');
+                }
+
+                return $pagoExistente;
+            }
+
+            $pedidoBloqueado = Pedido::whereKey($pedido->id)->lockForUpdate()->firstOrFail();
+
+            if ($pedidoBloqueado->estado !== 'pendiente') {
+                throw new DomainException('El pedido no admite un nuevo pago.');
+            }
+
             $pago = Pago::create([
-                'pedido_id' => $pedido->id,
+                'pedido_id' => $pedidoBloqueado->id,
                 'metodo_pago' => $metodoPago,
-                'id_transaccion' => 'TRX-' . strtoupper(Str::random(10)), // Simulación del ID de pasarela
-                'monto' => $pedido->total,
+                'id_transaccion' => $idTransaccion,
+                'monto' => $pedidoBloqueado->total,
                 'estado_pago' => 'aprobado',
-                'respuesta_pasarela' => 'Pago procesado exitosamente'
+                'respuesta_pasarela' => json_encode($respuestaPasarela, JSON_THROW_ON_ERROR),
             ]);
 
-            // 2. Actualizar el estado del pedido maestro a 'pagado'
-            $pedido->update(['estado' => 'pagado']);
+            $pedidoBloqueado->update(['estado' => 'pagado']);
 
             return $pago;
-        });
+        }, 3);
     }
 
-    /* =========================================================
-       MÉTODOS PRIVADOS 
-       ========================================================= */
-
-    private function guardarCliente(array $datos): Cliente
+    private function guardarClienteSinSobrescribir(array $datos): Cliente
     {
-        return Cliente::updateOrCreate(
+        return Cliente::firstOrCreate(
             ['email' => $datos['email']],
             [
                 'nombres' => $datos['nombres'],
@@ -116,55 +199,23 @@ class CheckoutService
         );
     }
 
-    private function generarPedido(int $clienteId, array $datos, float $totalCarrito): Pedido
-    {
+    private function generarPedido(
+        int $clienteId,
+        array $datos,
+        Carrito $carrito,
+        string $sessionTokenHash,
+        float $total
+    ): Pedido {
         return Pedido::create([
             'cliente_id' => $clienteId,
-            'numero_pedido' => 'PED-' . strtoupper(Str::random(8)),
+            'carrito_id' => $carrito->id,
+            'carrito_token_hash' => hash('sha256', $carrito->token_sesion),
+            'session_token_hash' => $sessionTokenHash,
+            'numero_pedido' => 'PED-' . Str::upper((string) Str::ulid()),
             'direccion_envio' => $datos['direccion_envio'],
             'referencia' => $datos['referencia'] ?? null,
-            'total' => $totalCarrito,
-            'estado' => 'pendiente', // Nace pendiente hasta que pague en el Paso 3
-        ]);
-    }
-
-    private function procesarDetallesYStock(int $pedidoId, Carrito $carrito): void
-    {
-        foreach ($carrito->elementos as $item) {
-
-            if ($item->variante->stock < $item->cantidad) {
-                throw new Exception("Stock insuficiente para: " . $item->variante->producto->nombre);
-            }
-
-            DetallePedido::create([
-                'pedido_id' => $pedidoId,
-                'variante_id' => $item->variante_id,
-                'cantidad' => $item->cantidad,
-                'precio_unitario' => $item->precio_unitario_real,
-            ]);
-
-            // Reducimos el inventario físico al instante
-            $item->variante->decrement('stock', $item->cantidad);
-        }
-    }
-
-    private function limpiarCarrito(Carrito $carrito): void
-    {
-        $carrito->elementos()->delete();
-        $carrito->delete();
-        session()->forget('carrito_token');
-    }
-
-
-    private function guardarDireccion(int $clienteId, array $datos): void
-    {
-        Direccion::create([
-            'cliente_id' => $clienteId,
-            // Si no viene distrito (porque es retiro), le ponemos '150101' (Lima Centro)
-            'distrito_id' => $datos['distrito'] ?? '150101',
-            'direccion_exacta' => $datos['direccion_envio'],
-            'referencia' => $datos['referencia'] ?? null,
-            'is_predeterminada' => true
+            'total' => round($total, 2),
+            'estado' => 'pendiente',
         ]);
     }
 }

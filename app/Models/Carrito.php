@@ -18,6 +18,11 @@ class Carrito extends Model
         return $this->hasMany(ElementoCarrito::class, 'carrito_id', 'id');
     }
 
+    public function pedido()
+    {
+        return $this->hasOne(Pedido::class, 'carrito_id', 'id');
+    }
+
     //Accesors para calcular los totales
     public function getCantidadTotalAttribute()
     {

@@ -11,28 +11,45 @@ services:
     ports:
       - "8000:80"
     environment:
-      # Ahora lee dinámicamente de tu archivo .env
-      - DB_CONNECTION=${DB_CONNECTION}
-      - DB_HOST=db
-      - DB_PORT=${DB_PORT}
-      - DB_DATABASE=${DB_DATABASE}
-      - DB_USERNAME=${DB_USERNAME}
-      - DB_PASSWORD=${DB_PASSWORD}
+      APP_ENV: ${DOCKER_APP_ENV:-production}
+      APP_DEBUG: ${DOCKER_APP_DEBUG:-false}
+      APP_KEY: ${APP_KEY}
+      APP_URL: ${APP_URL}
+      LOG_CHANNEL: ${LOG_CHANNEL:-stack}
+      LOG_LEVEL: ${LOG_LEVEL:-warning}
+      FILESYSTEM_DISK: ${FILESYSTEM_DISK:-public}
+      SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-true}
+      DB_CONNECTION: ${DB_CONNECTION}
+      DB_HOST: db
+      DB_PORT: ${DB_PORT}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    volumes:
+      - app_storage:/var/www/html/storage/app/public
+      - slider_data:/var/www/html/public/img/sliders
 
   db:
     image: mysql:8.0
     container_name: devioz_db
     restart: unless-stopped
     environment:
-      # Configura el contenedor MySQL usando tu .env
       MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "3306:3306"
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=\"$${MYSQL_ROOT_PASSWORD}\" mysqladmin ping -h localhost -uroot --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
     volumes:
       - db_data:/var/lib/mysql
 
 volumes:
   db_data:
+  app_storage:
+  slider_data:

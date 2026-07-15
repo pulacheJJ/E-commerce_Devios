@@ -22,15 +22,14 @@ Route::get('/producto/{slug}', [TiendaController::class, 'show'])->name('tienda.
 
 // Carrito
 Route::get('/carrito', [CarritoController::class, 'index'])->name('carrito.index');
-Route::post('/carrito/agregar', [CarritoController::class, 'agregar'])->name('carrito.agregar');
-Route::delete('/carrito/eliminar/{id}', [CarritoController::class, 'eliminar'])->name('carrito.eliminar');
-Route::put('/carrito/actualizar/{id}', [CarritoController::class, 'actualizar'])->name('carrito.actualizar');
+Route::post('/carrito/agregar', [CarritoController::class, 'agregar'])->middleware('throttle:carrito')->name('carrito.agregar');
+Route::delete('/carrito/eliminar/{id}', [CarritoController::class, 'eliminar'])->middleware('throttle:carrito')->name('carrito.eliminar');
+Route::put('/carrito/actualizar/{id}', [CarritoController::class, 'actualizar'])->middleware('throttle:carrito')->name('carrito.actualizar');
 
 // Checkout
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-Route::post('/checkout/procesar', [CheckoutController::class, 'procesar'])->name('checkout.procesar');
-Route::get('/checkout/pago/{numero_pedido}', [CheckoutController::class, 'pago'])->name('checkout.pago');
-Route::post('/checkout/pago/confirmar', [CheckoutController::class, 'confirmarPago'])->name('checkout.confirmar_pago');
+Route::post('/checkout/procesar', [CheckoutController::class, 'procesar'])->middleware('throttle:checkout')->name('checkout.procesar');
+Route::get('/checkout/pago/{numero_pedido}', [CheckoutController::class, 'pago'])->middleware('throttle:pago')->name('checkout.pago');
 
 // Promociones
 Route::get('/promocion/{id}', [TiendaController::class, 'promocion'])->name('tienda.promocion');
@@ -39,7 +38,7 @@ Route::get('/promocion/{id}', [TiendaController::class, 'promocion'])->name('tie
 // RUTAS ADMINISTRATIVAS (Backoffice)
 // ==========================================
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login-admin')->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Agregamos 'role:admin' para que solo los administradores puedan acceder

@@ -22,13 +22,20 @@ RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 RUN a2enmod rewrite
 
 # Copiamos Composer desde su imagen oficial
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Configuramos el directorio de trabajo
 WORKDIR /var/www/html
 
-# Copiamos los archivos del proyecto al contenedor
+# Instalamos primero las dependencias bloqueadas, sin depender de vendor del host
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-interaction --no-progress --prefer-dist --no-scripts --optimize-autoloader
+
+# Copiamos el código sin archivos sensibles excluidos por .dockerignore
 COPY . .
+RUN composer dump-autoload --no-dev --optimize --no-scripts \
+    && php artisan package:discover --ansi \
+    && ln -sfn /var/www/html/storage/app/public /var/www/html/public/storage
 
 # Ajustamos los permisos para las carpetas de Laravel
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache

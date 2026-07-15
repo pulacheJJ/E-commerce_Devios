@@ -39,7 +39,7 @@ class CarritoService
      */
     public function actualizarCantidad(int $elementoId, int $nuevaCantidad): array
     {
-        $elemento = ElementoCarrito::find($elementoId);
+        $elemento = $this->obtenerElementoPropio($elementoId);
         if (!$elemento) {
             return ['success' => false, 'message' => 'Elemento no encontrado.'];
         }
@@ -58,15 +58,19 @@ class CarritoService
     /**
      * Elimina un item. Si el carrito queda vacío, se auto-elimina de la BD.
      */
-    public function eliminarItem(int $elementoId): void
+    public function eliminarItem(int $elementoId): bool
     {
-        $elemento = ElementoCarrito::find($elementoId);
+        $elemento = $this->obtenerElementoPropio($elementoId);
 
-        if ($elemento) {
-            $carrito = $elemento->carrito;
-            $elemento->delete();
-            $this->limpiarSesionSiEstaVacio($carrito);
+        if (!$elemento) {
+            return false;
         }
+
+        $carrito = $elemento->carrito;
+        $elemento->delete();
+        $this->limpiarSesionSiEstaVacio($carrito);
+
+        return true;
     }
 
     /**
@@ -83,16 +87,43 @@ class CarritoService
             ->first();
     }
 
+    public function obtenerHashPropietarioActual(bool $crear = false): ?string
+    {
+        if (!session()->has('checkout_owner_token') && $crear) {
+            session()->put('checkout_owner_token', Str::random(64));
+        }
+
+        $token = session()->get('checkout_owner_token');
+
+        return $token ? hash('sha256', $token) : null;
+    }
+
     /* =========================================================
        MÉTODOS PRIVADOS (Reglas de Negocio Aisladas - SRP)
        ========================================================= */
 
     private function obtenerOCrearCarrito(): Carrito
     {
+        $this->obtenerHashPropietarioActual(true);
+
         if (!session()->has('carrito_token')) {
             session()->put('carrito_token', Str::uuid()->toString());
+            session()->forget('last_checkout_order_id');
         }
         return Carrito::firstOrCreate(['token_sesion' => session()->get('carrito_token')]);
+    }
+
+    private function obtenerElementoPropio(int $elementoId): ?ElementoCarrito
+    {
+        $token = session()->get('carrito_token');
+
+        if (!$token) {
+            return null;
+        }
+
+        return ElementoCarrito::whereKey($elementoId)
+            ->whereHas('carrito', fn ($query) => $query->where('token_sesion', $token))
+            ->first();
     }
 
     private function obtenerElemento(int $carritoId, int $varianteId): ?ElementoCarrito
@@ -111,8 +142,8 @@ class CarritoService
             return ['valido' => false, 'mensaje' => 'La cantidad mínima es 1.'];
         }
 
-        $variante = VarianteProducto::find($varianteId);
-        if (!$variante) {
+        $variante = VarianteProducto::with('producto')->find($varianteId);
+        if (!$variante || !$variante->producto || !$variante->producto->esta_activo) {
             return ['valido' => false, 'mensaje' => 'Producto no disponible.'];
         }
 
