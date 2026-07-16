@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class VarianteProducto extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'variantes_producto';
 
     protected $fillable = [
@@ -24,7 +27,7 @@ class VarianteProducto extends Model
         return $this->belongsTo(Producto::class, 'producto_id', 'id');
     }
 
-    //decide si cobrar el precio real o si hay un precio oferta activo
+    // decide si cobrar el precio real o si hay un precio oferta activo
     public function getPrecioRealAttribute()
     {
         return $this->precio_oferta > 0 ? $this->precio_oferta : $this->precio;

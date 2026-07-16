@@ -111,11 +111,11 @@
                         </div>
 
                         <div class="pdp-buttons-group">
-                            <button id="btnComprarAhora" class="btn btn--primary pdp-btn-buy"
+                            <button type="button" id="btnComprarAhora" class="btn btn--primary pdp-btn-buy"
                                 {{ $producto->variante_por_defecto->stock == 0 ? 'disabled' : '' }}>
                                 Comprar ahora
                             </button>
-                            <button id="btnAgregarCarrito" class="btn btn--secondary pdp-btn-cart"
+                            <button type="button" id="btnAgregarCarrito" class="btn btn--secondary pdp-btn-cart"
                                 {{ $producto->variante_por_defecto->stock == 0 ? 'disabled' : '' }}>
                                 Agregar al carrito
                             </button>

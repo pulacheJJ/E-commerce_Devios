@@ -17,7 +17,7 @@ class StorePromocionRequest extends FormRequest
             'titulo' => 'required|string|max:150',
             'subtitulo' => 'nullable|string|max:255',
             // Obligamos a que sea imagen, max 2MB
-            'ruta_banner' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048', 
+            'ruta_banner' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
             'url_destino' => 'nullable|url|max:255',
             'tipo_descuento' => 'required|in:porcentaje,fijo',
             'valor_descuento' => 'required|numeric|min:0',
@@ -26,12 +26,12 @@ class StorePromocionRequest extends FormRequest
             'fecha_fin' => 'required|date|after:fecha_inicio',
             'esta_activa' => 'nullable|boolean',
             'destacada_en_carrusel' => 'nullable|boolean',
-            
+
             // Validamos los arrays que vendrán de tu multiselect
             'categorias' => 'nullable|array',
-            'categorias.*' => 'exists:categorias,id',
+            'categorias.*' => 'distinct|exists:categorias,id',
             'productos' => 'nullable|array',
-            'productos.*' => 'exists:productos,id',
+            'productos.*' => 'distinct|exists:productos,id',
         ];
     }
 }

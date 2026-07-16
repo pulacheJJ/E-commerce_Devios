@@ -9,12 +9,14 @@ class Direccion extends Model
     protected $table = 'direcciones';
 
     protected $fillable = [
-        'cliente_id', 
-        'distrito_id', 
-        'direccion_exacta', 
-        'referencia', 
-        'is_predeterminada'
+        'cliente_id',
+        'distrito_id',
+        'direccion_exacta',
+        'referencia',
+        'is_predeterminada',
     ];
+
+    protected $casts = ['is_predeterminada' => 'boolean'];
 
     public function cliente()
     {

@@ -73,9 +73,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // 2. Asignación de nombres (para el resumen visual)
-                hDep.value = selDep.options[selDep.selectedIndex].text;
-                hProv.value = selProv.options[selProv.selectedIndex].text;
-                hDist.value = selDist.options[selDist.selectedIndex].text;
+                hDep.value = selDep.value;
+                hProv.value = selProv.value;
+                hDist.value = selDist.value;
 
                 // 3. Asignación del ID del distrito (ESTO ES LO QUE ESTABA FALTANDO PARA TU ERROR)
                 // El value de selDist YA es el ID (ej: 200114), así que lo asignamos directamente
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 5. Actualización visual en el resumen
                 txtDireccionSeleccionada.innerHTML = `
             <strong style="color: var(--ink); display: block;">${hDir.value}</strong>
-            <span style="color: #64748b; font-size: 0.85rem;">${hDist.value}, ${hProv.value}, ${hDep.value}</span>
+            <span style="color: #64748b; font-size: 0.85rem;">${selDist.options[selDist.selectedIndex].text}, ${selProv.options[selProv.selectedIndex].text}, ${selDep.options[selDep.selectedIndex].text}</span>
         `;
 
                 // 6. Cierre del modal

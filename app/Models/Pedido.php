@@ -19,6 +19,13 @@ class Pedido extends Model
         'referencia',
         'total',
         'estado',
+        'expires_at',
+        'inventory_released_at',
+    ];
+
+    protected $casts = [
+        'expires_at' => 'datetime',
+        'inventory_released_at' => 'datetime',
     ];
 
     // Relación: El pedido pertenece a un cliente

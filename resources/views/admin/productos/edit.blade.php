@@ -7,6 +7,12 @@
             <a href="{{ route('admin.productos.index') }}" class="btn btn--outline">Volver</a>
         </header>
 
+        @if ($errors->any())
+            <div role="alert" style="margin-bottom: 20px; padding: 14px 16px; border: 1px solid #ef4444; border-radius: 8px; background: rgba(239, 68, 68, .12); color: #fecaca;">
+                Existen campos por corregir. Revisa la información marcada antes de guardar.
+            </div>
+        @endif
+
         <form action="{{ route('admin.productos.update', $producto) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
@@ -36,7 +42,7 @@
                                 <select name="categoria_id" class="form-select" required>
                                     @foreach ($categorias as $cat)
                                         <option value="{{ $cat->id }}"
-                                            {{ $producto->categoria_id == $cat->id ? 'selected' : '' }}>
+                                            {{ old('categoria_id', $producto->categoria_id) == $cat->id ? 'selected' : '' }}>
                                             {{ $cat->nombre }}</option>
                                     @endforeach
                                 </select>
@@ -67,30 +73,45 @@
                                     </tr>
                                 </thead>
                                 <tbody id="variantes-container">
-                                    @foreach ($producto->variantes as $index => $variante)
-                                        <tr class="variante-row">
+                                    @php
+                                        $variantesFormulario = old('variantes', $producto->variantes->map(fn ($variante) => [
+                                            'id' => $variante->id,
+                                            'sku' => $variante->sku,
+                                            'color' => $variante->color,
+                                            'especificacion' => $variante->especificacion,
+                                            'precio' => $variante->precio,
+                                            'precio_oferta' => $variante->precio_oferta,
+                                            'stock' => $variante->stock,
+                                        ])->all());
+                                    @endphp
+                                    @foreach ($variantesFormulario as $index => $variante)
+                                        <tr class="variante-row" data-variant-index="{{ $index }}">
                                             <td>
                                                 <input type="hidden" name="variantes[{{ $index }}][id]"
-                                                    value="{{ $variante->id }}">
+                                                    value="{{ $variante['id'] ?? '' }}">
                                                 <input type="text" name="variantes[{{ $index }}][sku]"
-                                                    class="form-input form-input--sm" value="{{ $variante->sku }}"
-                                                    placeholder="SKU">
+                                                    class="form-input form-input--sm" value="{{ $variante['sku'] ?? '' }}"
+                                                    placeholder="SKU" required
+                                                    @error("variantes.$index.sku") aria-invalid="true" @enderror>
+                                                @error("variantes.$index.sku")
+                                                    <small class="variant-field-error" style="display: block; margin-top: 5px; color: #fca5a5;">{{ $message }}</small>
+                                                @enderror
                                             </td>
 
                                             <td>
                                                 <input type="text" name="variantes[{{ $index }}][color]"
                                                     class="form-input form-input--sm mb-5"
-                                                    value="{{ $variante->color }}" placeholder="Color">
+                                                    value="{{ $variante['color'] ?? '' }}" placeholder="Color">
                                                 <input type="text"
                                                     name="variantes[{{ $index }}][especificacion]"
                                                     class="form-input form-input--sm"
-                                                    value="{{ $variante->especificacion }}" placeholder="Esp.">
+                                                    value="{{ $variante['especificacion'] ?? '' }}" placeholder="Esp.">
                                             </td>
 
                                             <td>
                                                 <input type="number" step="0.01"
                                                     name="variantes[{{ $index }}][precio]"
-                                                    class="form-input form-input--sm" value="{{ $variante->precio }}"
+                                                    class="form-input form-input--sm" value="{{ $variante['precio'] ?? '' }}"
                                                     required>
                                             </td>
 
@@ -98,12 +119,12 @@
                                                 <input type="number" step="0.01"
                                                     name="variantes[{{ $index }}][precio_oferta]"
                                                     class="form-input form-input--sm"
-                                                    value="{{ $variante->precio_oferta }}">
+                                                    value="{{ $variante['precio_oferta'] ?? '' }}">
                                             </td>
 
                                             <td>
                                                 <input type="number" name="variantes[{{ $index }}][stock]"
-                                                    class="form-input form-input--sm" value="{{ $variante->stock }}"
+                                                    class="form-input form-input--sm" value="{{ $variante['stock'] ?? 0 }}"
                                                     required>
                                             </td>
 

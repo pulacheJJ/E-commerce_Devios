@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Producto;
 use App\Models\Categoria;
+use App\Models\Producto;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -23,21 +23,21 @@ class ProductoService
 
     public function crear(array $datos)
     {
-        //preparamos los datos base
+        // preparamos los datos base
         $datos['slug'] = Str::slug($datos['nombre']);
         $datos['esta_activo'] = isset($datos['esta_activo']);
 
         $variantes = $datos['variantes'];
         $imagenes = $datos['imagenes'];
 
-        return DB::transaction(function () use ($datos, $variantes, $imagenes) {
-            //Creamos el producto base
+        return DB::transaction(function () use ($datos) {
+            // Creamos el producto base
             $producto = Producto::create($datos);
 
-            //crear producto variante
+            // crear producto variante
             $this->crearVariantes($producto, $datos['variantes']);
 
-            //subir y guardar imagenes
+            // subir y guardar imagenes
             $this->subirGaleriaImagenes($producto, $datos['imagenes']);
 
             return $producto;
@@ -53,7 +53,7 @@ class ProductoService
         return DB::transaction(function () use ($producto, $datos) {
             $producto->update($datos);
             $this->sincronizarVariantes($producto, $datos['variantes']);
-            if (!empty($datos['imagenes'])) {
+            if (! empty($datos['imagenes'])) {
                 $this->subirNuevasImagenes($producto, $datos['imagenes']);
             }
 
@@ -65,7 +65,7 @@ class ProductoService
     {
         foreach ($variantes as $variante) {
             $producto->variantes()->create([
-                'sku' => $variante['sku'] ?? null,
+                'sku' => trim($variante['sku']),
                 'color' => $variante['color'] ?? null,
                 'especificacion' => $variante['especificacion'] ?? null,
                 'precio' => $variante['precio'],
@@ -75,23 +75,24 @@ class ProductoService
         }
     }
 
-    private function subirGaleriaImagenes(Producto $producto, array $imagenes):void
+    private function subirGaleriaImagenes(Producto $producto, array $imagenes): void
     {
         foreach ($imagenes as $index => $archivo) {
             $producto->imagenes()->create([
-                'ruta_imagen'  => $archivo->store('products', 'public'),
+                'ruta_imagen' => $archivo->store('products', 'public'),
                 'es_principal' => $index === 0 ? true : false, // La primera de la lista será la portada
             ]);
         }
     }
+
     private function sincronizarVariantes(Producto $producto, array $variantes): void
     {
         $variantesIds = [];
 
         foreach ($variantes as $varData) {
-            if (!empty($varData['id'])) {
+            if (! empty($varData['id'])) {
                 $producto->variantes()->where('id', $varData['id'])->update([
-                    'sku' => $varData['sku'] ?? null,
+                    'sku' => trim($varData['sku']),
                     'color' => $varData['color'] ?? null,
                     'especificacion' => $varData['especificacion'] ?? null,
                     'precio' => $varData['precio'],
@@ -100,13 +101,14 @@ class ProductoService
                 ]);
                 $variantesIds[] = $varData['id'];
             } else {
+                $varData['sku'] = trim($varData['sku']);
                 $nuevaVariante = $producto->variantes()->create($varData);
                 $variantesIds[] = $nuevaVariante->id;
             }
         }
 
-        //eliminamos las variantes que el usario borro
-        if (!empty($variantesIds)) {
+        // eliminamos las variantes que el usario borro
+        if (! empty($variantesIds)) {
             $producto->variantes()->whereNotIn('id', $variantesIds)->delete();
         }
     }
@@ -121,10 +123,10 @@ class ProductoService
         }
     }
 
-    public function cambiarEstado(Producto $producto):bool
+    public function cambiarEstado(Producto $producto): bool
     {
         return $producto->update([
-            'esta_activo' =>!$producto->esta_activo
+            'esta_activo' => ! $producto->esta_activo,
         ]);
     }
 }

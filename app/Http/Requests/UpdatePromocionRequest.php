@@ -25,9 +25,9 @@ class UpdatePromocionRequest extends FormRequest
             'esta_activa' => 'nullable|boolean',
             'destacada_en_carrusel' => 'nullable|boolean',
             'categorias' => 'nullable|array',
-            'categorias.*' => 'exists:categorias,id',
+            'categorias.*' => 'distinct|exists:categorias,id',
             'productos' => 'nullable|array',
-            'productos.*' => 'exists:productos,id',
+            'productos.*' => 'distinct|exists:productos,id',
         ];
     }
 }

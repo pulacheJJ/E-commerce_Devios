@@ -16,15 +16,16 @@ use InvalidArgumentException;
 
 class CheckoutService
 {
-    public function __construct(private CarritoService $carritoService)
-    {
-    }
+    public function __construct(
+        private CarritoService $carritoService,
+        private DireccionService $direccionService
+    ) {}
 
     public function prepararVistaCheckout(): array
     {
         $carrito = $this->carritoService->obtenerCarritoActual();
 
-        if (!$carrito || $carrito->elementos->isEmpty()) {
+        if (! $carrito || $carrito->elementos->isEmpty()) {
             return ['es_valido' => false, 'carrito' => null];
         }
 
@@ -36,7 +37,7 @@ class CheckoutService
         $sessionTokenHash = $this->carritoService->obtenerHashPropietarioActual(true);
         $carritoActual = $this->carritoService->obtenerCarritoActual();
 
-        if (!$carritoActual && session()->has('last_checkout_order_id')) {
+        if (! $carritoActual && session()->has('last_checkout_order_id')) {
             $pedidoAnterior = Pedido::whereKey(session()->get('last_checkout_order_id'))
                 ->where('session_token_hash', $sessionTokenHash)
                 ->first();
@@ -46,7 +47,7 @@ class CheckoutService
             }
         }
 
-        if (!$carritoActual || !$sessionTokenHash) {
+        if (! $carritoActual || ! $sessionTokenHash) {
             throw new DomainException('No existe un carrito válido para esta sesión.');
         }
 
@@ -56,14 +57,14 @@ class CheckoutService
                 ->lockForUpdate()
                 ->first();
 
-            if (!$carrito) {
+            if (! $carrito) {
                 throw new DomainException('El carrito ya no está disponible.');
             }
 
             $pedidoExistente = Pedido::where('carrito_id', $carrito->id)->first();
 
             if ($pedidoExistente) {
-                if (!hash_equals((string) $pedidoExistente->session_token_hash, $sessionTokenHash)) {
+                if (! hash_equals((string) $pedidoExistente->session_token_hash, $sessionTokenHash)) {
                     throw new DomainException('El pedido pertenece a otra sesión.');
                 }
 
@@ -94,7 +95,7 @@ class CheckoutService
             foreach ($elementos as $item) {
                 $variante = $variantes->get($item->variante_id);
 
-                if (!$variante || !$variante->producto || !$variante->producto->esta_activo) {
+                if (! $variante || ! $variante->producto || ! $variante->producto->esta_activo) {
                     throw new DomainException('Uno de los productos ya no está disponible.');
                 }
 
@@ -109,6 +110,9 @@ class CheckoutService
             }
 
             $cliente = $this->guardarClienteSinSobrescribir($datosValidados);
+            if ($datosValidados['metodo_entrega'] === 'domicilio') {
+                $this->direccionService->guardarComoPredeterminada($cliente, $datosValidados);
+            }
             $pedido = $this->generarPedido(
                 $cliente->id,
                 $datosValidados,
@@ -149,7 +153,7 @@ class CheckoutService
         string $idTransaccion,
         array $respuestaPasarela = []
     ): Pago {
-        if ($idTransaccion === '' || !in_array($metodoPago, ['tarjeta', 'yape', 'plin', 'transferencia'], true)) {
+        if ($idTransaccion === '' || ! in_array($metodoPago, ['tarjeta', 'yape', 'plin', 'transferencia'], true)) {
             throw new InvalidArgumentException('Datos de pago verificado inválidos.');
         }
 
@@ -168,6 +172,10 @@ class CheckoutService
 
             if ($pedidoBloqueado->estado !== 'pendiente') {
                 throw new DomainException('El pedido no admite un nuevo pago.');
+            }
+
+            if ($pedidoBloqueado->expires_at && $pedidoBloqueado->expires_at->isPast()) {
+                throw new DomainException('El pedido venció y ya no admite pagos.');
             }
 
             $pago = Pago::create([
@@ -211,11 +219,12 @@ class CheckoutService
             'carrito_id' => $carrito->id,
             'carrito_token_hash' => hash('sha256', $carrito->token_sesion),
             'session_token_hash' => $sessionTokenHash,
-            'numero_pedido' => 'PED-' . Str::upper((string) Str::ulid()),
+            'numero_pedido' => 'PED-'.Str::upper((string) Str::ulid()),
             'direccion_envio' => $datos['direccion_envio'],
             'referencia' => $datos['referencia'] ?? null,
             'total' => round($total, 2),
             'estado' => 'pendiente',
+            'expires_at' => now()->addMinutes(config('pedidos.expiration_minutes', 30)),
         ]);
     }
 }
