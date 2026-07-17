@@ -3,18 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreElementoCarritoRequest;
+use App\Http\Requests\UpdateElementoCarritoRequest;
 use App\Services\CarritoService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Throwable;
 
 class CarritoController extends Controller
 {
-    public function __construct(private CarritoService $carritoService)
-    {
-    }
+    public function __construct(private CarritoService $carritoService) {}
 
     public function index()
     {
@@ -28,7 +26,7 @@ class CarritoController extends Controller
         try {
             $resultado = $this->carritoService->agregarItem($request->variante_id, $request->cantidad);
 
-            if (!$resultado['success']) {
+            if (! $resultado['success']) {
                 return response()->json([
                     'status' => 'error',
                     'message' => $resultado['message'],
@@ -45,14 +43,12 @@ class CarritoController extends Controller
         }
     }
 
-    public function actualizar(Request $request, int $id): JsonResponse
+    public function actualizar(UpdateElementoCarritoRequest $request, int $id): JsonResponse
     {
-        $request->validate(['cantidad' => 'required|integer|min:1']);
-
         try {
-            $resultado = $this->carritoService->actualizarCantidad($id, $request->cantidad);
+            $resultado = $this->carritoService->actualizarCantidad($id, $request->integer('cantidad'));
 
-            if (!$resultado['success']) {
+            if (! $resultado['success']) {
                 return response()->json([
                     'status' => 'error',
                     'message' => $resultado['message'],
@@ -68,7 +64,7 @@ class CarritoController extends Controller
     public function eliminar(int $id): JsonResponse
     {
         try {
-            if (!$this->carritoService->eliminarItem($id)) {
+            if (! $this->carritoService->eliminarItem($id)) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'El elemento no existe en tu carrito.',

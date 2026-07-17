@@ -4,9 +4,11 @@
     <div class="admin-header-module">
         <h2>Perfil del Usuario</h2>
         <div class="header-actions">
+            @can('usuarios.editar')
             <a href="{{ route('admin.usuarios.edit', $usuario->id) }}" class="btn-primary-action">
                 <i class="fas fa-pen"></i> Editar
             </a>
+            @endcan
             <a href="{{ route('admin.usuarios.index') }}" class="btn-secondary">
                 <i class="fas fa-arrow-left"></i> Volver
             </a>

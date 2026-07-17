@@ -8,7 +8,9 @@
                 <p style="color: #4a6b82; margin-top: 5px; font-family: monospace;">{{ $producto->slug }}</p>
             </div>
             <div style="display: flex; gap: 10px;">
-                <a href="{{ route('admin.productos.edit', $producto) }}" class="btn btn--primary">Editar Producto</a>
+                @can('productos.editar')
+                    <a href="{{ route('admin.productos.edit', $producto) }}" class="btn btn--primary">Editar Producto</a>
+                @endcan
                 <a href="{{ route('admin.productos.index') }}" class="btn btn--outline">Volver al catálogo</a>
             </div>
         </header>

@@ -21,7 +21,9 @@
         @endif
 
         <div class="slider-admin-grid">
-            @include('admin.sliders.partials.create-form')
+            @can('sliders.crear')
+                @include('admin.sliders.partials.create-form')
+            @endcan
 
             @include('admin.sliders.partials.table')
         </div>

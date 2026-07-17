@@ -33,12 +33,14 @@
                             style="text-decoration: none; color: #38bdf8; font-weight: 600;">
                             <i class="fas fa-eye"></i> Ver
                         </a>
+                        @can('sliders.editar')
                         <a href="{{ route('admin.sliders.edit', $slider->id) }}" class="slider-btn-edit">Editar</a>
                         <form action="{{ route('admin.sliders.destroy', $slider->id) }}" method="POST"
                             onsubmit="return confirm('¿Eliminar banner?')">
                             @csrf @method('DELETE')
                             <button type="submit" class="slider-btn-delete">Borrar</button>
                         </form>
+                        @endcan
                     </td>
                 </tr>
             @empty

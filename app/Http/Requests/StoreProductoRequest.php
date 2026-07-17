@@ -9,7 +9,7 @@ class StoreProductoRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->can('productos.crear') ?? false;
     }
 
     public function rules(): array
@@ -20,7 +20,7 @@ class StoreProductoRequest extends FormRequest
             'slug' => 'required|string|max:250|unique:productos,slug',
             'marca' => 'nullable|string|max:100',
             'categoria_id' => 'required|exists:categorias,id',
-            'descripcion' => 'nullable|string',
+            'descripcion' => 'nullable|string|max:10000',
             'esta_activo' => 'nullable|boolean',
 
             // Validar que las variantes sean un array correcto
@@ -28,9 +28,9 @@ class StoreProductoRequest extends FormRequest
             'variantes.*.sku' => ['required', 'string', 'max:100', 'distinct:ignore_case', Rule::unique('variantes_producto', 'sku')],
             'variantes.*.color' => 'nullable|string|max:50',
             'variantes.*.especificacion' => 'nullable|string|max:100',
-            'variantes.*.precio' => 'required|numeric|min:0',
-            'variantes.*.precio_oferta' => 'nullable|numeric|min:0|lt:variantes.*.precio',
-            'variantes.*.stock' => 'required|integer|min:0',
+            'variantes.*.precio' => 'required|numeric|gt:0|max:99999999.99',
+            'variantes.*.precio_oferta' => 'nullable|numeric|gt:0|max:99999999.99|lt:variantes.*.precio',
+            'variantes.*.stock' => 'required|integer|min:0|max:1000000',
 
             // Validar que suban imágenes reales
             'imagenes' => 'required|array|min:1',

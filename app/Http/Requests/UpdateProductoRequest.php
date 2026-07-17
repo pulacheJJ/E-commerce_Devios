@@ -9,7 +9,7 @@ class UpdateProductoRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->can('productos.editar') ?? false;
     }
 
     public function rules(): array
@@ -29,14 +29,14 @@ class UpdateProductoRequest extends FormRequest
             ],
             'marca' => 'nullable|string|max:100',
             'categoria_id' => 'required|exists:categorias,id',
-            'descripcion' => 'nullable|string',
+            'descripcion' => 'nullable|string|max:10000',
             'esta_activo' => 'nullable|boolean',
 
             // 2. Validación de Variantes
             'variantes' => 'required|array|min:1',
             'variantes.*.id' => [
                 'nullable',
-                Rule::exists('variantes_producto', 'id')->where(fn ($query) => $query->where('producto_id', $productoId)),
+                Rule::exists('variantes_producto', 'id')->where(fn ($query) => $query->where('producto_id', $productoId)->whereNull('deleted_at')),
             ],
             'variantes.*.sku' => [
                 'required',
@@ -59,9 +59,9 @@ class UpdateProductoRequest extends FormRequest
             ],
             'variantes.*.color' => 'nullable|string|max:50',
             'variantes.*.especificacion' => 'nullable|string|max:100',
-            'variantes.*.precio' => 'required|numeric|min:0',
-            'variantes.*.precio_oferta' => 'nullable|numeric|min:0|lt:variantes.*.precio',
-            'variantes.*.stock' => 'required|integer|min:0',
+            'variantes.*.precio' => 'required|numeric|gt:0|max:99999999.99',
+            'variantes.*.precio_oferta' => 'nullable|numeric|gt:0|max:99999999.99|lt:variantes.*.precio',
+            'variantes.*.stock' => 'required|integer|min:0|max:1000000',
 
             // 3. Validación de Imágenes
             // REGLA CLAVE: 'nullable' porque el usuario puede actualizar un precio sin subir nuevas fotos

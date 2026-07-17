@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ChangeAdminResourceStatusRequest;
 use App\Models\Categoria;
 use App\Services\CategoriaService;
 use App\Http\Requests\StoreCategoriaRequest;
@@ -50,7 +51,7 @@ class CategoriaController extends Controller
             ->with('success', 'Categoría actualizada con éxito.');
     }
 
-    public function toggle(Categoria $categoria)
+    public function toggle(ChangeAdminResourceStatusRequest $request, Categoria $categoria)
     {
         try {
             // Delegamos la lógica de negocio al servicio

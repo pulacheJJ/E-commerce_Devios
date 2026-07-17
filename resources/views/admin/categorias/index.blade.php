@@ -5,7 +5,9 @@
 
         <header class="admin-header">
             <h1 class="admin-header__title">Mantenimiento de Categorías</h1>
-            <a href="{{ route('admin.categorias.create') }}" class="btn btn--primary">Nueva Categoría</a>
+            @can('categorias.crear')
+                <a href="{{ route('admin.categorias.create') }}" class="btn btn--primary">Nueva Categoría</a>
+            @endcan
         </header>
 
         @if (session('success'))
@@ -54,8 +56,11 @@
                         @endif
                     </td>
                     <td class="table-actions">
-                        <a href="{{ route('admin.categorias.edit', $cat) }}" class="btn btn--outline btn--sm">Editar</a>
+                        @can('categorias.editar')
+                            <a href="{{ route('admin.categorias.edit', $cat) }}" class="btn btn--outline btn--sm">Editar</a>
+                        @endcan
 
+                        @can('categorias.cambiar_estado')
                         <form action="{{ route('admin.categorias.toggle', $cat) }}" method="POST" class="form-inline"
                             onsubmit="return confirm('¿Estás seguro de {{ $cat->esta_activa ? 'desactivar' : 'activar' }} esta categoría?');">
                             @csrf
@@ -67,6 +72,7 @@
                                 {{ $cat->esta_activa ? 'Desactivar' : 'Activar' }}
                             </button>
                         </form>
+                        @endcan
                     </td>
                     </tr>
                     @empty

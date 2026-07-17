@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ChangeAdminResourceStatusRequest;
 use App\Http\Requests\StoreProductoRequest;
 use App\Http\Requests\UpdateProductoRequest;
 use App\Models\Producto;
@@ -47,7 +48,7 @@ class ProductController extends Controller
         return redirect()->route('admin.productos.index')->with('success', 'producto actualizado con exito');
     }
 
-    public function toggle(Producto $producto)
+    public function toggle(ChangeAdminResourceStatusRequest $request, Producto $producto)
     {
         $this->service->cambiarEstado($producto);
         $mensaje = $producto->esta_activo

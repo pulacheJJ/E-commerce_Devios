@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ChangeAdminResourceStatusRequest;
 use App\Models\Promocion;
 use App\Models\Categoria;
 use App\Models\Producto;
@@ -72,7 +73,7 @@ class PromocionController extends Controller
                          ->with('success', '¡Promoción actualizada perfectamente!');
     }
 
-    public function toggle(Promocion $promocione)
+    public function toggle(ChangeAdminResourceStatusRequest $request, Promocion $promocione)
     {
         $estado = $this->promocionService->alternarEstado($promocione);
         $mensaje = $estado ? 'activada' : 'desactivada';

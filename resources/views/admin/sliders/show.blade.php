@@ -53,9 +53,11 @@
             </div>
 
             <div class="slider-show-actions">
+                @can('sliders.editar')
                 <a href="{{ route('admin.sliders.edit', $slider->id) }}" class="slider-btn-update slider-show-btn-edit">
                     <i class="fas fa-edit"></i> Editar este Banner
                 </a>
+                @endcan
             </div>
 
         </div>

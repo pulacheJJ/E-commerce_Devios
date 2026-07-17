@@ -3,9 +3,11 @@
 
     <div class="admin-header-module">
         <h2>Gestión de Usuarios</h2>
+        @can('usuarios.crear')
         <a href="{{ route('admin.usuarios.create') }}" class="btn-primary-action">
             <i class="fas fa-plus"></i> Nuevo Usuario
         </a>
+        @endcan
     </div>
 
     <div class="table-container">
@@ -34,12 +36,16 @@
                     </td>
                     <td class="actions-cell">
                         <a href="{{ route('admin.usuarios.show', $user->id) }}" class="btn-icon text-info" title="Ver detalles"><i class="fas fa-eye"></i></a>
-                        <a href="{{ route('admin.usuarios.edit', $user->id) }}" class="btn-icon text-warning" title="Editar"><i class="fas fa-pen"></i></a>
+                        @can('usuarios.editar')
+                            <a href="{{ route('admin.usuarios.edit', $user->id) }}" class="btn-icon text-warning" title="Editar"><i class="fas fa-pen"></i></a>
+                        @endcan
+                        @can('usuarios.cambiar_estado')
                         @if($user->id !== auth()->id())
                         <button type="button" class="btn-icon toggle-status-btn {{ $user->trashed() ? 'text-success' : 'text-danger' }}" data-id="{{ $user->id }}" title="{{ $user->trashed() ? 'Restaurar' : 'Desactivar' }}">
                             <i class="fas {{ $user->trashed() ? 'fa-check-circle' : 'fa-ban' }}"></i>
                         </button>
                         @endif
+                        @endcan
                     </td>
                 </tr>
                 @endforeach

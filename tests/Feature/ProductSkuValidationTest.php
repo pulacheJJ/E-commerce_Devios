@@ -42,9 +42,11 @@ class ProductSkuValidationTest extends TestCase
     public function test_json_validation_response_identifies_the_nested_sku_field(): void
     {
         $existing = VarianteProducto::with('producto')->firstOrFail();
+        $user = User::factory()->create();
+        $user->assignRole(Role::findByName('admin'));
         RouteFacade::post('/_test/product-sku-validation', fn (StoreProductoRequest $request) => response()->noContent());
 
-        $response = $this->postJson('/_test/product-sku-validation', [
+        $response = $this->actingAs($user)->postJson('/_test/product-sku-validation', [
             'nombre' => 'Producto de prueba',
             'slug' => 'producto-json-'.uniqid(),
             'categoria_id' => $existing->producto->categoria_id,

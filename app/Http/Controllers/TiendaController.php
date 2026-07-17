@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\CatalogoService;
+use App\Http\Requests\CatalogoFilterRequest;
 use App\Models\Promocion;
-use Illuminate\Http\Request;
+use App\Services\CatalogoService;
 
 class TiendaController extends Controller
 {
@@ -16,25 +16,27 @@ class TiendaController extends Controller
         $this->catalogoService = $catalogoService;
     }
 
-    public function index(Request $request)
+    public function index(CatalogoFilterRequest $request)
     {
-        $filtros = $request->all();
+        $filtros = $request->validated();
 
         $productos = $this->catalogoService->obtenerCatalogoPaginado($filtros);
         $categoriasPadre = $this->catalogoService->obtenerCategoriasPadreConConteo($filtros);
         $marcas = $this->catalogoService->obtenerMarcasActivas($filtros);
         $slides = $this->catalogoService->obtenerSlidesHero();
+
         return view('tienda.inicio', compact('productos', 'categoriasPadre', 'marcas', 'slides'));
     }
 
     // Añade este método debajo de tu método index()
 
-    public function promocion(Request $request, $id)
+    public function promocion(CatalogoFilterRequest $request, $id)
     {
-        $promocion = Promocion::findOrFail($id);
+        $promocion = Promocion::where('esta_activa', true)->findOrFail($id);
+        abort_unless($promocion->es_vigente, 404);
 
         // CORRECCIÓN: Si $request->all() es null, lo forzamos a ser un array vacío
-        $filtros = $request->all() ?? [];
+        $filtros = $request->validated();
 
         // Forzamos el filtro de la promoción
         $filtros['promocion_id'] = $promocion->id;
@@ -48,10 +50,12 @@ class TiendaController extends Controller
 
         return view('tienda.inicio', compact('productos', 'categoriasPadre', 'marcas', 'slides', 'promocion'));
     }
+
     public function show($slug)
     {
         $producto = $this->catalogoService->obtenerProductoPorSlug($slug);
         $relacionados = $this->catalogoService->obtenerCategoriasRelacionados($producto, 4);
+
         return view('tienda.show', compact('producto', 'relacionados'));
     }
 }
