@@ -41,13 +41,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const variantesContainer = document.getElementById('variantes-container');
     
     // Cuenta cuántas filas existen actualmente (vital para el edit)
-    let varianteIndex = document.querySelectorAll('.variante-row').length;
+    const indicesExistentes = Array.from(document.querySelectorAll('.variante-row'))
+        .map(row => Number.parseInt(row.dataset.variantIndex, 10))
+        .filter(Number.isInteger);
+    let varianteIndex = indicesExistentes.length > 0 ? Math.max(...indicesExistentes) + 1 : 0;
 
     function agregarFilaVariante() {
         const tr = document.createElement('tr');
         tr.className = 'variante-row';
+        tr.dataset.variantIndex = varianteIndex;
         tr.innerHTML = `
-            <td><input type="text" name="variantes[${varianteIndex}][sku]" class="form-input form-input--sm" placeholder="SKU"></td>
+            <td>
+                <input type="text" name="variantes[${varianteIndex}][sku]" class="form-input form-input--sm" placeholder="SKU" required>
+                <small class="variant-field-error" data-error-for="variantes.${varianteIndex}.sku" style="display: none; margin-top: 5px; color: #fca5a5;"></small>
+            </td>
             <td>
                 <input type="text" name="variantes[${varianteIndex}][color]" class="form-input form-input--sm mb-5" placeholder="Color">
                 <input type="text" name="variantes[${varianteIndex}][especificacion]" class="form-input form-input--sm" placeholder="Esp.">
@@ -71,6 +78,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (variantesContainer) {
+        variantesContainer.addEventListener('input', function(e) {
+            if (e.target.matches('input[name$="[sku]"]')) {
+                e.target.removeAttribute('aria-invalid');
+                const error = e.target.parentElement.querySelector('.variant-field-error');
+                if (error) error.remove();
+            }
+        });
+
         variantesContainer.addEventListener('click', function(e) {
             // Event Delegation para eliminar
             if (e.target.closest('.btn-remove-var')) {

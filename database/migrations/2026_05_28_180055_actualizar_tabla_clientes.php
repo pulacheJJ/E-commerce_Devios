@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::table('clientes', function (Blueprint $table) {
@@ -12,7 +13,8 @@ return new class extends Migration {
             $table->renameColumn('nombre', 'nombres');
 
             // Agregamos los nuevos campos
-            $table->string('apellidos')->nullable()->after('nombre');
+            // En instalaciones nuevas, el nombre vigente después del rename es `nombres`.
+            $table->string('apellidos')->nullable()->after('nombres');
             $table->string('tipo_documento', 20)->default('DNI')->after('telefono');
             $table->string('numero_documento', 20)->nullable()->after('tipo_documento');
         });

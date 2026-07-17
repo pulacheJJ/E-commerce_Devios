@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\User;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class UserService
@@ -13,27 +15,34 @@ class UserService
         return User::withTrashed()->with('roles')->latest()->paginate(10);
     }
 
-    public function createUser(array $data)
+    public function createUser(array $data): User
     {
-        $data['password'] = Hash::make($data['password']);
-        $user = User::create($data);
-        $user->assignRole($data['role']);
-        
-        return $user;
+        return DB::transaction(function () use ($data): User {
+            $attributes = Arr::only($data, ['name', 'email', 'password']);
+            $attributes['password'] = Hash::make($attributes['password']);
+
+            $user = User::create($attributes);
+            $user->syncRoles([$data['role']]);
+            $user->syncPermissions($data['role'] === 'gestor' ? ($data['permissions'] ?? []) : []);
+
+            return $user;
+        });
     }
 
-    public function updateUser(User $user, array $data)
+    public function updateUser(User $user, array $data): User
     {
-        if (!empty($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
-        } else {
-            unset($data['password']);
-        }
+        return DB::transaction(function () use ($user, $data): User {
+            $attributes = Arr::only($data, ['name', 'email']);
+            if (! empty($data['password'])) {
+                $attributes['password'] = Hash::make($data['password']);
+            }
 
-        $user->update($data);
-        $user->syncRoles([$data['role']]);
+            $user->update($attributes);
+            $user->syncRoles([$data['role']]);
+            $user->syncPermissions($data['role'] === 'gestor' ? ($data['permissions'] ?? []) : []);
 
-        return $user;
+            return $user->load('roles', 'permissions');
+        });
     }
 
     public function toggleStatus($id)

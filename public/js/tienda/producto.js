@@ -132,11 +132,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // 3. CERRAMOS EL CANDADO: Indicamos que empezó el proceso
-        isProcessing = true;
-
         const productoId = productDataElement.getAttribute('data-producto-id');
         const varianteId = varianteActiva.getAttribute('data-id');
-        const cantidad = cantidadInput.value;
+        const cantidad = Number.parseInt(cantidadInput.value, 10);
+
+        if (!Number.isInteger(cantidad) || cantidad < 1) {
+            errorCantidad.textContent = 'Ingresa una cantidad válida.';
+            return;
+        }
+        isProcessing = true;
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         errorCantidad.textContent = '';
@@ -163,9 +167,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     window.location.href = '/checkout';
                 } else {
                     // Si es agregar normal, restauramos el botón y mostramos el modal
-                    btnElement.textContent = textoOriginal;
-                    btnElement.disabled = false;
-
                     document.getElementById('modalImagen').src = imagenPrincipal.src;
                     document.getElementById('modalVariante').textContent = 'Opción: ' + varianteActiva.querySelector('strong').textContent;
                     document.getElementById('modalPrecio').textContent = precioDisplay.textContent;
@@ -175,29 +176,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } else {
                 errorCantidad.textContent = data.message || 'Error al procesar';
-                btnElement.textContent = textoOriginal;
-                btnElement.disabled = false;
             }
         } catch (error) {
             console.error('Error:', error);
             errorCantidad.textContent = 'Ocurrió un error de conexión.';
+        } finally {
             btnElement.textContent = textoOriginal;
             btnElement.disabled = false;
-        } finally {
             // 4. ABRIMOS EL CANDADO SIEMPRE: Pase lo que pase (éxito o error), liberamos el proceso
             isProcessing = false;
         }
     }
 
     // Asignamos los eventos a ambos botones
-    if (btnAgregarCarrito && productDataElement) {
-        btnAgregarCarrito.addEventListener('click', function () {
+    if (btnAgregarCarrito && productDataElement && btnAgregarCarrito.dataset.cartListenerBound !== 'true') {
+        btnAgregarCarrito.dataset.cartListenerBound = 'true';
+        btnAgregarCarrito.addEventListener('click', function (event) {
+            event.preventDefault();
             procesarAccionCarrito(this, false); // false = Mostrar modal
         });
     }
 
-    if (btnComprarAhora && productDataElement) {
-        btnComprarAhora.addEventListener('click', function () {
+    if (btnComprarAhora && productDataElement && btnComprarAhora.dataset.cartListenerBound !== 'true') {
+        btnComprarAhora.dataset.cartListenerBound = 'true';
+        btnComprarAhora.addEventListener('click', function (event) {
+            event.preventDefault();
             procesarAccionCarrito(this, true); // true = Redirigir al checkout
         });
     }

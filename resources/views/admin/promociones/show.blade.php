@@ -4,7 +4,9 @@
     <div class="admin-header">
         <h2>Detalles: {{ $promocione->titulo }}</h2>
         <div class="header-actions">
-            <a href="{{ route('admin.promociones.edit', $promocione->id) }}" class="btn-warning"><i class="fas fa-edit"></i> Editar</a>
+            @can('promociones.editar')
+                <a href="{{ route('admin.promociones.edit', $promocione->id) }}" class="btn-warning"><i class="fas fa-edit"></i> Editar</a>
+            @endcan
             <a href="{{ route('admin.promociones.index') }}" class="btn-secondary"><i class="fas fa-arrow-left"></i> Volver</a>
         </div>
     </div>

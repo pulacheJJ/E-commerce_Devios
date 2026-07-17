@@ -4,7 +4,9 @@
     <div class="admin-container" style="max-width: 1200px;">
         <header class="admin-header">
             <h1 class="admin-header__title">Catálogo de Productos</h1>
-            <a href="{{ route('admin.productos.create') }}" class="btn btn--primary">Nuevo Producto</a>
+            @can('productos.crear')
+                <a href="{{ route('admin.productos.create') }}" class="btn btn--primary">Nuevo Producto</a>
+            @endcan
         </header>
 
         @if (session('success'))
@@ -57,9 +59,12 @@
                                 <a href="{{ route('admin.productos.show', $prod) }}" class="btn btn--sm"
                                     style="background-color: #1f3a4d; color: var(--ink);">Ver</a>
 
+                                @can('productos.editar')
                                 <a href="{{ route('admin.productos.edit', $prod) }}"
                                     class="btn btn--outline btn--sm">Editar</a>
+                                @endcan
 
+                                @can('productos.cambiar_estado')
                                 <form action="{{ route('admin.productos.toggle', $prod) }}" method="POST"
                                     class="form-inline"
                                     onsubmit="return confirm('¿Seguro que deseas {{ $prod->esta_activo ? 'desactivar' : 'activar' }} este producto?');">
@@ -71,6 +76,7 @@
                                         {{ $prod->esta_activo ? 'Desactivar' : 'Activar' }}
                                     </button>
                                 </form>
+                                @endcan
                             </td>
                         </tr>
                     @empty

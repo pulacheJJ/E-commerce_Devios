@@ -21,10 +21,7 @@
     @endif
 
     {{ $slot }}
-    <x-footer /> @isset($js)
-        {{ $js }}
-    @endisset
-
+    <x-footer />
     @isset($js)
         {{ $js }}
     @endisset

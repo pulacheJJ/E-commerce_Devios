@@ -11,17 +11,32 @@ class Pedido extends Model
     // Agregamos 'referencia' al fillable
     protected $fillable = [
         'cliente_id',
+        'carrito_id',
+        'carrito_token_hash',
+        'session_token_hash',
         'numero_pedido',
         'direccion_envio',
         'referencia',
         'total',
         'estado',
+        'expires_at',
+        'inventory_released_at',
+    ];
+
+    protected $casts = [
+        'expires_at' => 'datetime',
+        'inventory_released_at' => 'datetime',
     ];
 
     // Relación: El pedido pertenece a un cliente
     public function cliente()
     {
         return $this->belongsTo(Cliente::class, 'cliente_id', 'id');
+    }
+
+    public function carrito()
+    {
+        return $this->belongsTo(Carrito::class, 'carrito_id', 'id');
     }
 
     // Relación: Un pedido se compone de muchos productos en su detalle

@@ -3,9 +3,11 @@
 
     <div class="admin-header">
         <h2>Motor de Promociones</h2>
+        @can('promociones.crear')
         <a href="{{ route('admin.promociones.create') }}" class="btn-primary">
             <i class="fas fa-plus"></i> Nueva Promoción
         </a>
+        @endcan
     </div>
 
     @if(session('success'))
@@ -64,7 +66,10 @@
                             <td class="text-right">
                                 <div class="action-buttons">
                                     <a href="{{ route('admin.promociones.show', $promo->id) }}" class="btn-action text-info" title="Ver Detalles"><i class="fas fa-eye"></i></a>
+                                    @can('promociones.editar')
                                     <a href="{{ route('admin.promociones.edit', $promo->id) }}" class="btn-action text-warning" title="Editar"><i class="fas fa-edit"></i></a>
+                                    @endcan
+                                    @can('promociones.cambiar_estado')
                                     <form action="{{ route('admin.promociones.toggle', $promo->id) }}" method="POST" class="m-0">
                                         @csrf
                                         @method('PATCH')
@@ -72,11 +77,14 @@
                                             <i class="fas {{ $promo->esta_activa ? 'fa-power-off' : 'fa-play' }}"></i>
                                         </button>
                                     </form>
+                                    @endcan
+                                    @can('promociones.editar')
                                     <form action="{{ route('admin.promociones.destroy', $promo->id) }}" method="POST" class="m-0" onsubmit="return confirm('¿Eliminar esta promoción?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn-action text-danger" title="Eliminar"><i class="fas fa-trash"></i></button>
                                     </form>
+                                    @endcan
                                 </div>
                             </td>
                         </tr>

@@ -2,13 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Model;
 
-class Administrador extends Authenticatable
+/** Modelo legado: la autenticación oficial usa User con Spatie Permission. */
+class Administrador extends Model
 {
-    use Notifiable;
-
     // Le decimos a Laravel la tabla exacta en español
     protected $table = 'administradores';
 

@@ -9,6 +9,9 @@
     </div>
 
     <div class="admin-card form-card">
+        @if ($errors->any())
+            <div class="alert alert--danger">Hay campos por corregir antes de actualizar el usuario.</div>
+        @endif
         <form action="{{ route('admin.usuarios.update', $usuario->id) }}" method="POST">
             @csrf
             @method('PUT')
@@ -62,13 +65,15 @@
                             @foreach($roles as $role)
                                 <option value="{{ $role->name }}" 
                                     {{ (old('role') ?? ($usuario->roles->first()->name ?? '')) == $role->name ? 'selected' : '' }}>
-                                    {{ ucfirst($role->name) }}
+                                    {{ $role->name === 'admin' ? 'Administrador' : 'Gestor' }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
                     @error('role') <span class="error-text">{{ $message }}</span> @enderror
                 </div>
+
+                @include('admin.usuarios.partials.permissions', ['selectedPermissions' => $selectedPermissions])
             </div>
 
             <div class="form-actions-footer">
@@ -78,4 +83,8 @@
             </div>
         </form>
     </div>
+
+    <x-slot:js>
+        <script src="{{ asset('js/admin/usuarios/form.js') }}"></script>
+    </x-slot:js>
 </x-layouts.admin>

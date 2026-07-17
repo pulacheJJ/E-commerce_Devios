@@ -14,7 +14,7 @@ class LoginAdminRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email'    => 'required|email',
+            'email' => 'required|email',
             'password' => 'required|string|min:6',
         ];
     }
@@ -22,8 +22,8 @@ class LoginAdminRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.required'    => 'El correo corporativo es obligatorio.',
-            'email.email'       => 'Ingresa un formato de correo válido.',
+            'email.required' => 'El correo corporativo es obligatorio.',
+            'email.email' => 'Ingresa un formato de correo válido.',
             'password.required' => 'La contraseña es obligatoria.',
         ];
     }

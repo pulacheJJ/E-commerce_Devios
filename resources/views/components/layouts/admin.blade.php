@@ -24,27 +24,37 @@
                     class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                     <i class="fas fa-chart-line"></i> Dashboard
                 </a>
+                @can('categorias.ver')
                 <a href="{{ route('admin.categorias.index') }}"
                     class="{{ request()->routeIs('admin.categorias.*') ? 'active' : '' }}">
                     <i class="fas fa-tags"></i> Categorías
                 </a>
+                @endcan
+                @can('productos.ver')
                 <a href="{{ route('admin.productos.index') }}"
                     class="{{ request()->routeIs('admin.productos.*') ? 'active' : '' }}">
                     <i class="fas fa-box"></i> Productos
                 </a>
+                @endcan
+                @can('sliders.ver')
                 <a href="{{ route('admin.sliders.index') }}"
                     class="sidebar-link {{ request()->routeIs('admin.sliders.*') ? 'active' : '' }}">
                     <i class="fas fa-images"></i>
                     <span>Banners / Slider</span>
                 </a>
+                @endcan
+                @can('promociones.ver')
                 <a href="{{ route('admin.promociones.index') }}"
                     class="{{ request()->routeIs('admin.promociones.*') ? 'active' : '' }}">
                     <i class="fas fa-percent"></i> Promociones
                 </a>
+                @endcan
+                @can('usuarios.ver')
                 <a href="{{ route('admin.usuarios.index') }}"
                     class="{{ request()->routeIs('admin.usuarios.*') ? 'active' : '' }}">
                     <i class="fas fa-users"></i> Usuarios
                 </a>
+                @endcan
                 <hr>
                 <a href="{{ route('tienda.inicio') }}" target="_blank" class="nav-link">
                     <i class="fas fa-store"></i>
@@ -68,7 +78,7 @@
                 <div class="top-bar__search"></div>
                 <div class="top-bar__user">
                     <i class="fas fa-user-shield" style="color: var(--teal); margin-right: 8px;"></i>
-                    <span>Administrador</span>
+                    <span>{{ auth()->user()->hasRole('admin') ? 'Administrador' : 'Gestor' }}</span>
                 </div>
             </header>
 
