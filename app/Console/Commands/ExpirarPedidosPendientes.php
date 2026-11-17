@@ -20,7 +20,7 @@ class ExpirarPedidosPendientes extends Command
         $errores = 0;
 
         Pedido::query()
-            ->whereIn('estado', config('pedidos.expirable_states', ['pendiente']))
+            ->whereIn('estado', config('pedidos.expirable_states', ['reservado', 'pendiente_pago']))
             ->whereNull('inventory_released_at')
             ->whereNotNull('expires_at')
             ->where('expires_at', '<=', now())

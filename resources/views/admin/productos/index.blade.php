@@ -1,7 +1,7 @@
 <x-layouts.admin>
     <x-slot:title>Listado de Productos | DEVIOZ</x-slot:title>
 
-    <div class="admin-container" style="max-width: 1200px;">
+    <div class="admin-container admin-container--wide">
         <header class="admin-header">
             <h1 class="admin-header__title">Catálogo de Productos</h1>
             @can('productos.crear')
@@ -31,11 +31,11 @@
                 </thead>
                 <tbody>
                     @forelse($productos as $prod)
-                        <tr style="{{ !$prod->esta_activo ? 'opacity: 0.6;' : '' }}">
+                        <tr @class(['table-row--inactive' => ! $prod->esta_activo])>
                             <td>
                                 @php $imgPrincipal = $prod->imagenes->where('es_principal', 1)->first(); @endphp
                                 @if ($imgPrincipal)
-                                    <img src="{{ asset('storage/' . $imgPrincipal->ruta_imagen) }}" alt="Img"
+                                    <img src="{{ $imgPrincipal->url }}" alt="Img"
                                         class="img-thumbnail">
                                 @else
                                     <div class="img-placeholder">Sin img</div>
@@ -56,8 +56,7 @@
                                 @endif
                             </td>
                             <td class="table-actions">
-                                <a href="{{ route('admin.productos.show', $prod) }}" class="btn btn--sm"
-                                    style="background-color: #1f3a4d; color: var(--ink);">Ver</a>
+                                <a href="{{ route('admin.productos.show', $prod) }}" class="btn btn--sm btn--view">Ver</a>
 
                                 @can('productos.editar')
                                 <a href="{{ route('admin.productos.edit', $prod) }}"
@@ -71,8 +70,7 @@
                                     @csrf
                                     @method('PATCH')
                                     <button type="submit"
-                                        class="btn {{ $prod->esta_activo ? 'btn--danger' : 'btn--primary' }} btn--sm"
-                                        @if (!$prod->esta_activo) style="background-color: var(--teal); color: var(--bg); border: none;" @endif>
+                                        class="btn {{ $prod->esta_activo ? 'btn--danger' : 'btn--primary btn--activate' }} btn--sm">
                                         {{ $prod->esta_activo ? 'Desactivar' : 'Activar' }}
                                     </button>
                                 </form>

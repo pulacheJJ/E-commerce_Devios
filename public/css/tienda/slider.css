@@ -211,3 +211,7 @@
     width: 60px;
 }
 
+.slide-image-link {
+    display: block;
+    height: 100%;
+}

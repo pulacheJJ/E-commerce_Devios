@@ -1,0 +1,88 @@
+services:
+  - type: web
+    name: devioz-ecommerce-demo
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: APP_NAME
+        value: DEVIOZ
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        sync: false
+      - key: APP_URL
+        sync: false
+      - key: FORCE_HTTPS
+        value: "true"
+      - key: ADMIN_DOMAIN
+        value: ""
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: warning
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "4000"
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: MYSQL_ATTR_SSL_CA
+        value: /etc/ssl/certs/ca-certificates.crt
+      - key: CACHE_DRIVER
+        value: file
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: SESSION_DRIVER
+        value: file
+      - key: SESSION_SECURE_COOKIE
+        value: "true"
+      - key: SESSION_SAME_SITE
+        value: lax
+      - key: MEDIA_DISK
+        value: cloudinary
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: CLOUDINARY_DELIVERY_URL
+        value: ""
+      - key: RUN_MIGRATIONS
+        value: "true"
+      - key: RUN_DEMO_SEEDERS
+        value: "true"
+      - key: RUN_MEDIA_COPY
+        value: "false"
+      - key: RUN_SCHEDULER
+        value: "true"
+      - key: SEED_ADMIN_NAME
+        sync: false
+      - key: SEED_ADMIN_EMAIL
+        sync: false
+      - key: SEED_ADMIN_PASSWORD
+        sync: false
+      - key: PAYMENT_SIMULATOR_ENABLED
+        value: "false"
+      - key: MERCADOPAGO_ENABLED
+        value: "true"
+      - key: MERCADOPAGO_MODE
+        value: test
+      - key: MERCADOPAGO_ALLOW_LIVE
+        value: "false"
+      - key: MERCADOPAGO_TEST_PUBLIC_KEY
+        sync: false
+      - key: MERCADOPAGO_TEST_ACCESS_TOKEN
+        sync: false
+      - key: MERCADOPAGO_TEST_WEBHOOK_SECRET
+        sync: false

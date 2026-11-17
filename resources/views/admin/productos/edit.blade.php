@@ -1,14 +1,14 @@
 <x-layouts.admin>
     <x-slot:title>Editar Producto | DEVIOZ</x-slot:title>
 
-    <div class="admin-container" style="max-width: 1200px;">
+    <div class="admin-container admin-container--wide">
         <header class="admin-header">
             <h1 class="admin-header__title">Editar: {{ $producto->nombre }}</h1>
             <a href="{{ route('admin.productos.index') }}" class="btn btn--outline">Volver</a>
         </header>
 
         @if ($errors->any())
-            <div role="alert" style="margin-bottom: 20px; padding: 14px 16px; border: 1px solid #ef4444; border-radius: 8px; background: rgba(239, 68, 68, .12); color: #fecaca;">
+            <div role="alert" class="product-form-alert">
                 Existen campos por corregir. Revisa la información marcada antes de guardar.
             </div>
         @endif
@@ -94,7 +94,7 @@
                                                     placeholder="SKU" required
                                                     @error("variantes.$index.sku") aria-invalid="true" @enderror>
                                                 @error("variantes.$index.sku")
-                                                    <small class="variant-field-error" style="display: block; margin-top: 5px; color: #fca5a5;">{{ $message }}</small>
+                                                    <small class="variant-field-error">{{ $message }}</small>
                                                 @enderror
                                             </td>
 
@@ -146,7 +146,7 @@
                         <div class="image-grid mb-20">
                             @foreach ($producto->imagenes as $img)
                                 <div class="preview-item">
-                                    <img src="{{ asset('storage/' . $img->ruta_imagen) }}" alt="Img">
+                                    <img src="{{ $img->url }}" alt="Img">
                                     @if ($img->es_principal)
                                         <span class="badge-principal">Principal</span>
                                     @endif
@@ -154,7 +154,7 @@
                             @endforeach
                         </div>
 
-                        <hr style="border-color: rgba(255,255,255,0.05); margin: 15px 0;">
+                        <hr class="product-divider">
 
                         <h3>Añadir Nuevas (Opcional)</h3>
                         <div class="form-group">

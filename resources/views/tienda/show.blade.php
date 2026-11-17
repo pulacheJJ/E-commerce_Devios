@@ -7,13 +7,13 @@
 
     <main class="store-container">
 
-        <nav class="breadcrumb" style="margin-bottom: 20px; font-size: 0.9rem;">
-            <a href="{{ route('tienda.inicio') }}" style="color: var(--teal); text-decoration: none;">Catálogo</a>
-            <span style="color: #64748b; margin: 0 5px;">/</span>
+        <nav class="breadcrumb product-breadcrumb">
+            <a href="{{ route('tienda.inicio') }}">Catálogo</a>
+            <span class="product-breadcrumb__separator">/</span>
             <a href="{{ route('tienda.inicio', ['categoria' => $producto->categoria->slug ?? '']) }}"
-                style="color: var(--teal); text-decoration: none;">{{ $producto->categoria->nombre ?? 'General' }}</a>
-            <span style="color: #64748b; margin: 0 5px;">/</span>
-            <span style="color: #94a3b8;">{{ $producto->nombre }}</span>
+                >{{ $producto->categoria->nombre ?? 'General' }}</a>
+            <span class="product-breadcrumb__separator">/</span>
+            <span class="product-breadcrumb__current">{{ $producto->nombre }}</span>
         </nav>
 
         <div class="pdp-layout">
@@ -22,15 +22,15 @@
                     <div class="pdp-thumbnails">
                         @foreach ($producto->imagenes as $imagen)
                             <div class="pdp-thumb {{ $loop->first ? 'active' : '' }}"
-                                data-src="{{ asset('storage/' . $imagen->ruta_imagen) }}">
-                                <img src="{{ asset('storage/' . $imagen->ruta_imagen) }}" alt="Miniatura">
+                                data-src="{{ $imagen->url }}">
+                                <img src="{{ $imagen->url }}" alt="Miniatura">
                             </div>
                         @endforeach
                     </div>
 
                     <div class="pdp-main-image">
                         @if ($producto->imagen_principal)
-                            <img src="{{ asset('storage/' . $producto->imagen_principal) }}"
+                            <img src="{{ $producto->imagen_principal_url }}"
                                 alt="{{ $producto->nombre }}" id="imagenPrincipal">
                         @else
                             <div class="product-card__no-image">Sin imagen</div>
@@ -76,7 +76,7 @@
                     </div>
                     <div class="pdp-variants-container">
                         <h3 class="pdp-variants-title">Opciones disponibles: <span id="opcionSeleccionadaText"
-                                style="color: var(--teal); font-weight: normal;">{{ $producto->variante_por_defecto->color }}</span>
+                                class="pdp-selected-option">{{ $producto->variante_por_defecto->color }}</span>
                         </h3>
 
                         <div class="pdp-variant-pills">
@@ -93,20 +93,18 @@
 
                     <div class="pdp-actions">
                         <div class="pdp-quantity">
-                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                                <label for="cantidadInput" style="margin: 0;">Cantidad:</label>
-                                <strong id="stockDisplay" style="color: #ef4444; font-size: 0.85rem;">
+                            <div class="pdp-quantity__header">
+                                <label for="cantidadInput">Cantidad:</label>
+                                <strong id="stockDisplay" class="pdp-stock-message">
                                     {{ $producto->variante_por_defecto->stock == 0 ? 'Sin stock' : '' }}
                                 </strong>
                             </div>
 
-                            <div class="quantity-wrapper"
-                                style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                            <div class="quantity-wrapper">
                                 <input type="number" id="cantidadInput" value="1" min="1"
                                     class="quantity-input"
                                     {{ $producto->variante_por_defecto->stock == 0 ? 'disabled' : '' }}>
-                                <span id="errorCantidad"
-                                    style="color: #ef4444; font-size: 0.85rem; font-weight: 600;"></span>
+                                <span id="errorCantidad" class="pdp-quantity-error"></span>
                             </div>
                         </div>
 

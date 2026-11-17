@@ -1,3 +1,25 @@
+# DEVIOZ Ecommerce
+
+Ecommerce Laravel con administracion granular, checkout transaccional, reserva
+de inventario, tarifas de envio, simulador y Mercado Pago Checkout Pro en modo
+de prueba.
+
+Documentacion de entrega:
+
+- [Despliegue portable con Docker](docs/docker-deployment.md)
+- [Entrega de la imagen mediante Docker Hub](docs/docker-hub-handoff.md)
+- [Despliegue de demostracion en Render y TiDB](docs/render-deployment.md)
+- [Almacenamiento de fotografias con Cloudinary](docs/cloudinary-media-storage.md)
+- [Almacenamiento de fotografias con Cloudflare R2](docs/r2-media-storage.md)
+- [Demostracion de pagos para supervisores](docs/supervisor-demo.md)
+- [Arquitectura de checkout y pagos](docs/stage-3-checkout-payments.md)
+- [Autorizacion y permisos](docs/stage-2-authorization.md)
+
+La imagen no contiene secretos y bloquea pagos reales por configuracion. Puede
+ejecutarse con una sola URL (`/admin`) o con hosts separados para tienda y panel.
+
+---
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">

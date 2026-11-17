@@ -2,7 +2,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <div class="modal-success-title">
-                <i class="fas fa-check-circle" style="color: #009B3A;"></i>
+                <i class="fas fa-check-circle modal-success-title__icon"></i>
                 <span>Producto agregado a tu Carro</span>
             </div>
             <button class="modal-close" id="btnCerrarModal">&times;</button>

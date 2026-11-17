@@ -29,8 +29,7 @@
                         </span>
                     </td>
                     <td class="slider-actions">
-                        <a href="{{ route('admin.sliders.show', $slider->id) }}" class="slider-btn-ver"
-                            style="text-decoration: none; color: #38bdf8; font-weight: 600;">
+                        <a href="{{ route('admin.sliders.show', $slider->id) }}" class="slider-btn-ver">
                             <i class="fas fa-eye"></i> Ver
                         </a>
                         @can('sliders.editar')

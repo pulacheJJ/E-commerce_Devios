@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\Promocion;
-use Illuminate\Support\Facades\Storage;
+use App\Support\MediaStorage;
 use Illuminate\Support\Facades\DB;
 
 class PromocionService
@@ -12,7 +12,7 @@ class PromocionService
     {
         return DB::transaction(function () use ($data, $bannerFile) {
             $data = $this->prepararDatosBooleanos($data);
-            
+
             if ($bannerFile) {
                 $data['ruta_banner'] = $this->procesarBanner($bannerFile);
             }
@@ -27,11 +27,13 @@ class PromocionService
 
     public function actualizarPromocion(Promocion $promocion, array $data, $bannerFile = null): Promocion
     {
-        return DB::transaction(function () use ($promocion, $data, $bannerFile) {
+        $rutaAnterior = $promocion->ruta_banner;
+
+        $promocionActualizada = DB::transaction(function () use ($promocion, $data, $bannerFile) {
             $data = $this->prepararDatosBooleanos($data);
 
             if ($bannerFile) {
-                $data['ruta_banner'] = $this->procesarBanner($bannerFile, $promocion->ruta_banner);
+                $data['ruta_banner'] = $this->procesarBanner($bannerFile);
             }
 
             $promocion->update($data);
@@ -40,14 +42,20 @@ class PromocionService
 
             return $promocion;
         });
+
+        if ($bannerFile && $rutaAnterior !== $promocionActualizada->ruta_banner) {
+            $this->eliminarBannerAnterior($rutaAnterior);
+        }
+
+        return $promocionActualizada;
     }
 
     public function alternarEstado(Promocion $promocion): bool
     {
         return DB::transaction(function () use ($promocion) {
-            $promocion->esta_activa = !$promocion->esta_activa;
+            $promocion->esta_activa = ! $promocion->esta_activa;
             $promocion->save();
-            
+
             $this->recalcularPreciosAfectados($promocion);
 
             return $promocion->esta_activa;
@@ -56,32 +64,43 @@ class PromocionService
 
     public function eliminarPromocion(Promocion $promocion): void
     {
+        $rutaBanner = $promocion->ruta_banner;
+
         DB::transaction(function () use ($promocion) {
             // Apagamos primero para limpiar precios afectados
             $promocion->esta_activa = false;
             $promocion->save();
             $this->recalcularPreciosAfectados($promocion);
 
-            if ($promocion->ruta_banner) {
-                Storage::disk('public')->delete($promocion->ruta_banner);
-            }
-
             $promocion->delete();
         });
+
+        $this->eliminarBannerAnterior($rutaBanner);
     }
 
-    private function procesarBanner($file, ?string $rutaAnterior = null): string
+    private function procesarBanner($file): string
     {
-        if ($rutaAnterior) {
-            Storage::disk('public')->delete($rutaAnterior);
+        return $file->store('promociones', MediaStorage::diskName());
+    }
+
+    private function eliminarBannerAnterior(?string $ruta): void
+    {
+        if (! $ruta) {
+            return;
         }
-        return $file->store('promociones', 'public');
+
+        try {
+            MediaStorage::disk()->delete($ruta);
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
     }
 
     private function prepararDatosBooleanos(array $data): array
     {
         $data['esta_activa'] = isset($data['esta_activa']);
         $data['destacada_en_carrusel'] = isset($data['destacada_en_carrusel']);
+
         return $data;
     }
 

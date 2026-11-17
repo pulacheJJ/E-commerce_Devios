@@ -40,6 +40,9 @@ RUN composer dump-autoload --no-dev --optimize --no-scripts \
 # Ajustamos los permisos para las carpetas de Laravel
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
+COPY docker/entrypoint.sh /usr/local/bin/devioz-entrypoint
+RUN chmod +x /usr/local/bin/devioz-entrypoint
+
 # Cambiamos el DocumentRoot de Apache a la carpeta public de Laravel
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
@@ -47,3 +50,5 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 
 # Exponemos el puerto 80
 EXPOSE 80
+
+ENTRYPOINT ["devioz-entrypoint"]

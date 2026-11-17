@@ -1,0 +1,120 @@
+.admin-container--wide {
+    max-width: 1200px;
+}
+
+.table-row--inactive {
+    opacity: 0.6;
+}
+
+.btn--view {
+    color: var(--ink);
+    background-color: #1f3a4d;
+}
+
+.product-form-alert {
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    color: #fecaca;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid #ef4444;
+    border-radius: 8px;
+}
+
+.variant-field-error {
+    display: block;
+    margin-top: 5px;
+    color: #fca5a5;
+}
+
+.product-divider {
+    margin: 15px 0;
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+.product-detail__slug {
+    margin-top: 5px;
+    color: #4a6b82;
+    font-family: monospace;
+}
+
+.product-detail__header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.product-detail__heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.product-detail__name {
+    margin-top: 0;
+    color: var(--ink);
+}
+
+.product-detail__status {
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+.product-detail__status.status--active {
+    background: rgba(45, 212, 191, 0.1);
+}
+
+.product-detail__status.status--inactive {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.product-detail__label {
+    color: var(--teal);
+    font-size: 0.85em;
+    text-transform: uppercase;
+}
+
+.product-detail__value {
+    margin: 5px 0;
+}
+
+.product-detail__description {
+    margin: 5px 0;
+    color: #a0b2c0;
+    line-height: 1.6;
+}
+
+.product-detail__section-title {
+    padding-bottom: 10px;
+    margin-top: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.product-detail__empty-gallery {
+    padding: 40px;
+    color: #4a6b82;
+    text-align: center;
+    border: 1px dashed #4a6b82;
+    border-radius: 8px;
+}
+
+.product-detail__offer-price {
+    color: var(--teal);
+    font-weight: 700;
+}
+
+.product-detail__empty-value {
+    color: #4a6b82;
+}
+
+.product-stock--available {
+    color: var(--ink);
+}
+
+.product-stock--low {
+    color: #f59e0b;
+    font-weight: 700;
+}
+
+.product-stock--empty {
+    color: #ef4444;
+    font-weight: 700;
+}

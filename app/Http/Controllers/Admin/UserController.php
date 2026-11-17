@@ -89,6 +89,7 @@ class UserController extends Controller
             'promociones' => 'Promociones',
             'sliders' => 'Sliders',
             'pedidos' => 'Pedidos',
+            'envios' => 'Envíos',
         ];
         $actionLabels = [
             'ver' => 'Ver',

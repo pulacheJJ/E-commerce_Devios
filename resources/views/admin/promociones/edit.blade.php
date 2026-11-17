@@ -87,7 +87,7 @@
                         <input type="file" name="ruta_banner" id="ruta_banner" class="form-control" accept="image/*">
                         <div id="banner-preview" class="mt-2 text-center">
                             @if($promocion->ruta_banner)
-                                <img src="{{ asset('storage/' . $promocion->ruta_banner) }}" alt="Banner actual" class="banner-preview-img">
+                                <img src="{{ $promocion->imagen_url }}" alt="Banner actual" class="banner-preview-img">
                             @endif
                         </div>
                     </div>

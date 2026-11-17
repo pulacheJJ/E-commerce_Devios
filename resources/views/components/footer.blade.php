@@ -54,13 +54,13 @@
         <div class="footer-col">
             <h4>Lo más buscado</h4>
             <ul>
-                <li><a href="#"><i class="fas fa-angle-right" style="font-size: 0.8em; margin-right: 5px;"></i>
+                <li><a href="#"><i class="fas fa-angle-right footer-link-icon"></i>
                         Laptops Gamer</a></li>
-                <li><a href="#"><i class="fas fa-angle-right" style="font-size: 0.8em; margin-right: 5px;"></i>
+                <li><a href="#"><i class="fas fa-angle-right footer-link-icon"></i>
                         Periféricos</a></li>
-                <li><a href="#"><i class="fas fa-angle-right" style="font-size: 0.8em; margin-right: 5px;"></i>
+                <li><a href="#"><i class="fas fa-angle-right footer-link-icon"></i>
                         Componentes PC</a></li>
-                <li><a href="#"><i class="fas fa-angle-right" style="font-size: 0.8em; margin-right: 5px;"></i>
+                <li><a href="#"><i class="fas fa-angle-right footer-link-icon"></i>
                         Monitores</a></li>
             </ul>
         </div>

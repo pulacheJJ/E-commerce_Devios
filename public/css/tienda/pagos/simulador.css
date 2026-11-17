@@ -1,0 +1,69 @@
+.payment-simulator {
+    max-width: 900px;
+}
+
+.payment-simulator__panel {
+    padding: 28px;
+    background: #071b28;
+    border: 2px solid var(--teal);
+    border-radius: 14px;
+}
+
+.payment-simulator__warning {
+    padding: 18px;
+    margin-bottom: 24px;
+    color: #fef3c7;
+    background: #713f12;
+    border-radius: 10px;
+}
+
+.payment-simulator__warning-title {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 1.25rem;
+}
+
+.payment-simulator__result {
+    padding: 18px;
+    margin-bottom: 24px;
+    background: #102f3e;
+    border-radius: 10px;
+}
+
+.payment-simulator__summary {
+    display: grid;
+    grid-template-columns: minmax(140px, 1fr) minmax(0, 1fr);
+    gap: 12px;
+}
+
+.payment-simulator__summary dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.payment-simulator__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+@media (max-width: 600px) {
+    .payment-simulator__panel {
+        padding: 20px;
+    }
+
+    .payment-simulator__summary {
+        grid-template-columns: 1fr;
+    }
+
+    .payment-simulator__summary dt {
+        font-weight: 700;
+    }
+
+    .payment-simulator__actions,
+    .payment-simulator__actions form,
+    .payment-simulator__actions .btn {
+        width: 100%;
+    }
+}

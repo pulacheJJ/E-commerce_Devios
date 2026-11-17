@@ -1,0 +1,15 @@
+.shipping-rates__table-wrapper {
+    overflow-x: auto;
+}
+
+.shipping-rates__table {
+    min-width: 760px;
+}
+
+.shipping-rate-form .form-grid {
+    margin-bottom: 1.5rem;
+}
+
+.shipping-rate-form [hidden] {
+    display: none;
+}

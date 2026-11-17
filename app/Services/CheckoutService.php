@@ -2,229 +2,196 @@
 
 namespace App\Services;
 
+use App\Contracts\ShippingCostCalculator;
+use App\Domain\Orders\PedidoEstado;
 use App\Models\Carrito;
 use App\Models\Cliente;
 use App\Models\DetallePedido;
 use App\Models\ElementoCarrito;
-use App\Models\Pago;
 use App\Models\Pedido;
 use App\Models\VarianteProducto;
+use App\Support\Money;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use InvalidArgumentException;
 
 class CheckoutService
 {
     public function __construct(
         private CarritoService $carritoService,
-        private DireccionService $direccionService
+        private DireccionService $direccionService,
+        private PedidoInventarioService $inventory,
+        private CheckoutPricingService $pricing,
+        private ShippingCostCalculator $shipping,
     ) {}
 
     public function prepararVistaCheckout(): array
     {
-        $carrito = $this->carritoService->obtenerCarritoActual();
+        $cart = $this->carritoService->obtenerCarritoActual();
 
-        if (! $carrito || $carrito->elementos->isEmpty()) {
-            return ['es_valido' => false, 'carrito' => null];
-        }
-
-        return ['es_valido' => true, 'carrito' => $carrito];
+        return $cart && $cart->elementos->isNotEmpty()
+            ? ['es_valido' => true, 'carrito' => $cart]
+            : ['es_valido' => false, 'carrito' => null];
     }
 
-    public function procesarCompra(array $datosValidados): Pedido
+    public function obtenerPedidoRecuperable(?string $numeroPedido = null): ?Pedido
     {
-        $sessionTokenHash = $this->carritoService->obtenerHashPropietarioActual(true);
-        $carritoActual = $this->carritoService->obtenerCarritoActual();
+        $orderId = session()->get('last_checkout_order_id');
+        $ownerHash = $this->carritoService->obtenerHashPropietarioActual();
 
-        if (! $carritoActual && session()->has('last_checkout_order_id')) {
-            $pedidoAnterior = Pedido::whereKey(session()->get('last_checkout_order_id'))
-                ->where('session_token_hash', $sessionTokenHash)
-                ->first();
-
-            if ($pedidoAnterior) {
-                return $pedidoAnterior;
-            }
+        if ((! $orderId && ! $numeroPedido) || ! $ownerHash) {
+            return null;
         }
 
-        if (! $carritoActual || ! $sessionTokenHash) {
+        $query = Pedido::with(['detalles.variante.producto.imagenes', 'pagos'])
+            ->where('session_token_hash', $ownerHash)
+            ->whereIn('estado', [
+                PedidoEstado::Creado->value,
+                PedidoEstado::Reservado->value,
+                PedidoEstado::PendientePago->value,
+            ])
+            ->where('expires_at', '>', now());
+
+        if ($numeroPedido) {
+            $query->where('numero_pedido', $numeroPedido);
+        } else {
+            $query->whereKey($orderId);
+        }
+
+        return $query->first();
+    }
+
+    public function procesarCompra(array $validatedData): Pedido
+    {
+        $order = $this->crearPedido($validatedData);
+        $this->inventory->reservar($order);
+
+        session()->put('last_checkout_order_id', $order->id);
+
+        return $order->fresh();
+    }
+
+    public function crearPedido(array $validatedData): Pedido
+    {
+        $sessionTokenHash = $this->carritoService->obtenerHashPropietarioActual(true);
+        $currentCart = $this->carritoService->obtenerCarritoActual();
+
+        if (! $currentCart && session()->has('last_checkout_order_id')) {
+            $previousOrder = Pedido::whereKey(session()->get('last_checkout_order_id'))
+                ->where('session_token_hash', $sessionTokenHash)
+                ->first();
+            if ($previousOrder) {
+                return $previousOrder;
+            }
+        }
+        if (! $currentCart || ! $sessionTokenHash) {
             throw new DomainException('No existe un carrito válido para esta sesión.');
         }
 
-        $pedido = DB::transaction(function () use ($datosValidados, $carritoActual, $sessionTokenHash) {
-            $carrito = Carrito::whereKey($carritoActual->id)
-                ->where('token_sesion', $carritoActual->token_sesion)
+        return DB::transaction(function () use ($validatedData, $currentCart, $sessionTokenHash): Pedido {
+            $cart = Carrito::whereKey($currentCart->id)
+                ->where('token_sesion', $currentCart->token_sesion)
                 ->lockForUpdate()
                 ->first();
-
-            if (! $carrito) {
+            if (! $cart) {
                 throw new DomainException('El carrito ya no está disponible.');
             }
 
-            $pedidoExistente = Pedido::where('carrito_id', $carrito->id)->first();
-
-            if ($pedidoExistente) {
-                if (! hash_equals((string) $pedidoExistente->session_token_hash, $sessionTokenHash)) {
+            $existingOrder = Pedido::where('carrito_id', $cart->id)->first();
+            if ($existingOrder) {
+                if (! hash_equals((string) $existingOrder->session_token_hash, $sessionTokenHash)) {
                     throw new DomainException('El pedido pertenece a otra sesión.');
                 }
 
-                return $pedidoExistente;
+                return $existingOrder;
             }
 
-            $elementos = ElementoCarrito::where('carrito_id', $carrito->id)
-                ->orderBy('variante_id')
-                ->get();
-
-            if ($elementos->isEmpty()) {
+            $items = ElementoCarrito::where('carrito_id', $cart->id)->orderBy('variante_id')->get();
+            if ($items->isEmpty()) {
                 throw new DomainException('El carrito está vacío.');
             }
 
-            $variantes = VarianteProducto::with([
+            $variants = VarianteProducto::with([
                 'producto.promociones',
                 'producto.categoria.promociones',
-            ])
-                ->whereIn('id', $elementos->pluck('variante_id'))
+            ])->whereIn('id', $items->pluck('variante_id'))
                 ->orderBy('id')
                 ->lockForUpdate()
                 ->get()
                 ->keyBy('id');
 
-            $detalles = [];
-            $total = 0.0;
-
-            foreach ($elementos as $item) {
-                $variante = $variantes->get($item->variante_id);
-
-                if (! $variante || ! $variante->producto || ! $variante->producto->esta_activo) {
+            $snapshots = [];
+            $subtotalCents = 0;
+            $discountCents = 0;
+            foreach ($items as $item) {
+                $variant = $variants->get($item->variante_id);
+                if (! $variant || ! $variant->producto || ! $variant->producto->esta_activo) {
                     throw new DomainException('Uno de los productos ya no está disponible.');
                 }
-
-                if ($variante->stock < $item->cantidad) {
+                if ($variant->stock < $item->cantidad) {
                     throw new DomainException('El stock disponible cambió. Revisa tu carrito.');
                 }
 
-                $item->setRelation('variante', $variante);
-                $precioUnitario = (float) $item->precio_unitario_real;
-                $total += $precioUnitario * $item->cantidad;
-                $detalles[] = [$item, $variante, $precioUnitario];
+                $price = $this->pricing->snapshot($variant);
+                $subtotalCents += $price['base_cents'] * $item->cantidad;
+                $discountCents += $price['discount_cents'] * $item->cantidad;
+                $snapshots[] = [$item, $variant, $price];
             }
 
-            $cliente = $this->guardarClienteSinSobrescribir($datosValidados);
-            if ($datosValidados['metodo_entrega'] === 'domicilio') {
-                $this->direccionService->guardarComoPredeterminada($cliente, $datosValidados);
-            }
-            $pedido = $this->generarPedido(
-                $cliente->id,
-                $datosValidados,
-                $carrito,
-                $sessionTokenHash,
-                $total
-            );
-
-            foreach ($detalles as [$item, $variante, $precioUnitario]) {
-                DetallePedido::create([
-                    'pedido_id' => $pedido->id,
-                    'variante_id' => $variante->id,
-                    'cantidad' => $item->cantidad,
-                    'precio_unitario' => $precioUnitario,
-                ]);
-
-                $variante->decrement('stock', $item->cantidad);
+            $shippingCents = $this->shipping->calculate($validatedData);
+            $totalCents = max(0, $subtotalCents - $discountCents + $shippingCents);
+            $client = $this->guardarClienteSinSobrescribir($validatedData);
+            if ($validatedData['metodo_entrega'] === 'domicilio') {
+                $this->direccionService->guardarComoPredeterminada($client, $validatedData);
             }
 
-            $carrito->elementos()->delete();
-
-            return $pedido;
-        }, 3);
-
-        session()->put('last_checkout_order_id', $pedido->id);
-        session()->forget('carrito_token');
-
-        return $pedido;
-    }
-
-    /**
-     * Entrada reservada para un webhook de pasarela previamente verificado.
-     * No debe exponerse a una solicitud iniciada por el navegador.
-     */
-    public function registrarPagoVerificado(
-        Pedido $pedido,
-        string $metodoPago,
-        string $idTransaccion,
-        array $respuestaPasarela = []
-    ): Pago {
-        if ($idTransaccion === '' || ! in_array($metodoPago, ['tarjeta', 'yape', 'plin', 'transferencia'], true)) {
-            throw new InvalidArgumentException('Datos de pago verificado inválidos.');
-        }
-
-        return DB::transaction(function () use ($pedido, $metodoPago, $idTransaccion, $respuestaPasarela) {
-            $pagoExistente = Pago::where('id_transaccion', $idTransaccion)->first();
-
-            if ($pagoExistente) {
-                if ($pagoExistente->pedido_id !== $pedido->id) {
-                    throw new DomainException('La transacción ya está asociada a otro pedido.');
-                }
-
-                return $pagoExistente;
-            }
-
-            $pedidoBloqueado = Pedido::whereKey($pedido->id)->lockForUpdate()->firstOrFail();
-
-            if ($pedidoBloqueado->estado !== 'pendiente') {
-                throw new DomainException('El pedido no admite un nuevo pago.');
-            }
-
-            if ($pedidoBloqueado->expires_at && $pedidoBloqueado->expires_at->isPast()) {
-                throw new DomainException('El pedido venció y ya no admite pagos.');
-            }
-
-            $pago = Pago::create([
-                'pedido_id' => $pedidoBloqueado->id,
-                'metodo_pago' => $metodoPago,
-                'id_transaccion' => $idTransaccion,
-                'monto' => $pedidoBloqueado->total,
-                'estado_pago' => 'aprobado',
-                'respuesta_pasarela' => json_encode($respuestaPasarela, JSON_THROW_ON_ERROR),
+            $order = Pedido::create([
+                'cliente_id' => $client->id,
+                'carrito_id' => $cart->id,
+                'carrito_token_hash' => hash('sha256', $cart->token_sesion),
+                'session_token_hash' => $sessionTokenHash,
+                'checkout_idempotency_key' => hash('sha256', 'checkout:'.$cart->id.':'.$sessionTokenHash),
+                'numero_pedido' => 'PED-'.Str::upper((string) Str::ulid()),
+                'direccion_envio' => $validatedData['direccion_envio'],
+                'referencia' => $validatedData['referencia'] ?? null,
+                'subtotal' => Money::decimal($subtotalCents),
+                'descuento_total' => Money::decimal($discountCents),
+                'costo_envio' => Money::decimal($shippingCents),
+                'total' => Money::decimal($totalCents),
+                'estado' => PedidoEstado::Creado->value,
+                'expires_at' => now()->addMinutes(config('pedidos.expiration_minutes', 30)),
             ]);
 
-            $pedidoBloqueado->update(['estado' => 'pagado']);
+            foreach ($snapshots as [$item, $variant, $price]) {
+                DetallePedido::create([
+                    'pedido_id' => $order->id,
+                    'variante_id' => $variant->id,
+                    'producto_nombre' => $variant->producto->nombre,
+                    'sku' => $variant->sku,
+                    'variante_descripcion' => collect([$variant->color, $variant->especificacion])->filter()->implode(' / ') ?: null,
+                    'precio_base_unitario' => Money::decimal($price['base_cents']),
+                    'descuento_unitario' => Money::decimal($price['discount_cents']),
+                    'precio_unitario' => Money::decimal($price['unit_cents']),
+                    'cantidad' => $item->cantidad,
+                    'subtotal_linea' => Money::decimal($price['unit_cents'] * $item->cantidad),
+                ]);
+            }
 
-            return $pago;
+            return $order;
         }, 3);
     }
 
-    private function guardarClienteSinSobrescribir(array $datos): Cliente
+    private function guardarClienteSinSobrescribir(array $data): Cliente
     {
         return Cliente::firstOrCreate(
-            ['email' => $datos['email']],
+            ['email' => $data['email']],
             [
-                'nombres' => $datos['nombres'],
-                'apellidos' => $datos['apellidos'],
-                'telefono' => $datos['telefono'],
+                'nombres' => $data['nombres'],
+                'apellidos' => $data['apellidos'],
+                'telefono' => $data['telefono'],
                 'tipo_documento' => 'DNI',
-                'numero_documento' => $datos['documento'],
+                'numero_documento' => $data['documento'],
             ]
         );
-    }
-
-    private function generarPedido(
-        int $clienteId,
-        array $datos,
-        Carrito $carrito,
-        string $sessionTokenHash,
-        float $total
-    ): Pedido {
-        return Pedido::create([
-            'cliente_id' => $clienteId,
-            'carrito_id' => $carrito->id,
-            'carrito_token_hash' => hash('sha256', $carrito->token_sesion),
-            'session_token_hash' => $sessionTokenHash,
-            'numero_pedido' => 'PED-'.Str::upper((string) Str::ulid()),
-            'direccion_envio' => $datos['direccion_envio'],
-            'referencia' => $datos['referencia'] ?? null,
-            'total' => round($total, 2),
-            'estado' => 'pendiente',
-            'expires_at' => now()->addMinutes(config('pedidos.expiration_minutes', 30)),
-        ]);
     }
 }

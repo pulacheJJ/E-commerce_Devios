@@ -16,6 +16,7 @@ class PermissionSeeder extends Seeder
         'promociones.ver', 'promociones.crear', 'promociones.editar', 'promociones.cambiar_estado',
         'sliders.ver', 'sliders.crear', 'sliders.editar', 'sliders.cambiar_estado',
         'pedidos.ver', 'pedidos.actualizar_estado', 'pedidos.cancelar',
+        'envios.ver', 'envios.crear', 'envios.editar', 'envios.cambiar_estado',
     ];
 
     public function run(): void

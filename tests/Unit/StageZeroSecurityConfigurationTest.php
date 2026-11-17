@@ -23,18 +23,20 @@ class StageZeroSecurityConfigurationTest extends TestCase
     public function test_checkout_has_no_public_payment_approval_route(): void
     {
         $routes = $this->projectFile('routes/web.php');
+        $checkoutScript = $this->projectFile('public/js/tienda/checkout.js');
 
         $this->assertStringNotContainsString('/checkout/pago/confirmar', $routes);
         $this->assertStringNotContainsString('confirmarPago', $routes);
+        $this->assertStringNotContainsString('/checkout/pago/confirmar', $checkoutScript);
     }
 
     public function test_verified_payment_path_is_idempotent_and_locked(): void
     {
-        $service = $this->projectFile('app/Services/CheckoutService.php');
+        $service = $this->projectFile('app/Services/Payments/WebhookPaymentService.php');
 
-        $this->assertStringContainsString("where('id_transaccion', \$idTransaccion)", $service);
+        $this->assertStringContainsString("where('id_transaccion', \$verified->externalTransactionId)", $service);
         $this->assertStringContainsString('lockForUpdate()', $service);
-        $this->assertStringContainsString('last_checkout_order_id', $service);
+        $this->assertStringContainsString('evento_externo_id', $service);
         $this->assertStringNotContainsString("'TRX-'", $service);
     }
 

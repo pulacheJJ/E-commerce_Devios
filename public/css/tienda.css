@@ -2,6 +2,11 @@
 @import url('tienda/header.css');
 @import url('tienda/slider.css');
 @import url('tienda/footer.css'); 
+@import url('tienda/producto.css');
+@import url('tienda/carrito.css');
+@import url('tienda/checkout.css');
+@import url('tienda/catalogo.css');
+@import url('tienda/modal-carrito.css');
 
 :root {
     --bg: #06121a;

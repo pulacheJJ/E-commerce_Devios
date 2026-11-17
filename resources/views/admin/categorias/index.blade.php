@@ -67,8 +67,7 @@
                             @method('PATCH')
 
                             <button type="submit"
-                                class="btn {{ $cat->esta_activa ? 'btn--danger' : 'btn--primary' }} btn--sm"
-                                @if (!$cat->esta_activa) style="background-color: var(--teal); color: var(--bg); border: none;" @endif>
+                                class="btn {{ $cat->esta_activa ? 'btn--danger' : 'btn--primary btn--activate' }} btn--sm">
                                 {{ $cat->esta_activa ? 'Desactivar' : 'Activar' }}
                             </button>
                         </form>

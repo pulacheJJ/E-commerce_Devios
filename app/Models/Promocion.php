@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\MediaStorage;
 use Illuminate\Database\Eloquent\Model;
 
 class Promocion extends Model
@@ -21,7 +22,7 @@ class Promocion extends Model
         'esta_activa',
         'tipo_descuento',
         'valor_descuento',
-        'destacada_en_carrusel'
+        'destacada_en_carrusel',
     ];
 
     // 2. Casteamos los datos para que Laravel trabaje las fechas con Carbon y los booleanos correctamente
@@ -53,7 +54,7 @@ class Promocion extends Model
 
     public function getImagenUrlAttribute()
     {
-        return asset('storage/' . $this->ruta_banner);
+        return MediaStorage::url($this->ruta_banner);
     }
 
     public function getLinkAttribute()

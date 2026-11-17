@@ -24,11 +24,11 @@
                 class="form-control" required></div>
     </div>
 
-    <div class="checkout-card-box" style="margin-top: 20px; padding: 0;">
-        <h2 class="checkout-section-title" style="padding: 20px 20px 10px;">Opciones de entrega</h2>
+    <div class="checkout-card-box checkout-card-box--delivery">
+        <h2 class="checkout-section-title checkout-section-title--delivery">Opciones de entrega</h2>
 
         <label class="delivery-option-card">
-            <div style="display: flex; gap: 15px;">
+            <div class="delivery-option-card__content">
                 <input type="radio" name="metodo_entrega" value="retiro" class="payment-radio">
                 <div>
                     <strong><i class="fas fa-store"></i> Retiro en tienda</strong>
@@ -39,7 +39,7 @@
         </label>
 
         <label class="delivery-option-card active">
-            <div style="display: flex; gap: 15px;">
+            <div class="delivery-option-card__content">
                 <input type="radio" name="metodo_entrega" value="domicilio" checked class="payment-radio">
                 <div>
                     <strong><i class="fas fa-truck"></i> Envío a domicilio</strong>
@@ -49,10 +49,10 @@
         </label>
 
         <div id="boxDireccionResumen" class="address-summary-box">
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <i class="fas fa-map-marker-alt" style="font-size: 1.5rem; color: #64748b;"></i>
+            <div class="address-summary-box__content">
+                <i class="fas fa-map-marker-alt address-summary-box__icon"></i>
                 <div id="textoDireccionSeleccionada">
-                    <span style="color: #ef4444; font-weight: 500;">Falta agregar dirección de entrega</span>
+                    <span class="address-summary-box__missing">Falta agregar dirección de entrega</span>
                 </div>
             </div>
             <button type="button" id="btnAbrirModalDireccion" class="btn-link-teal">

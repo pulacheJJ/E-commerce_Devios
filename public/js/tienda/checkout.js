@@ -28,14 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const txtDireccionSeleccionada = document.getElementById('textoDireccionSeleccionada');
 
-    // ==========================================
-    // VARIABLES DOM (PASO 3: PAGO)
-    // ==========================================
-    const formPagoSeguro = document.getElementById('formPagoSeguro');
-    const btnConfirmarPago = document.getElementById('btnConfirmarPago');
-    const radiosPago = document.querySelectorAll('input[name="metodo_pago"]');
-
-
     /* =========================================================
        LÓGICA DEL PASO 2 (ENTREGA)
        ========================================================= */
@@ -161,61 +153,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    /* =========================================================
-       LÓGICA DEL PASO 3 (PAGO)
-       ========================================================= */
-    if (formPagoSeguro && btnConfirmarPago) {
-
-        // 1. ESTILOS VISUALES DE SELECCIÓN DE PAGO
-        radiosPago.forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                document.querySelectorAll('.delivery-option-card').forEach(c => {
-                    c.classList.remove('active');
-                    c.style.borderColor = '#1e293b';
-                });
-                const card = e.target.closest('.delivery-option-card');
-                card.classList.add('active');
-                card.style.borderColor = 'var(--teal)';
-            });
-        });
-
-        // 2. CONFIRMAR PAGO FINAL (AJAX AL BACKEND)
-        btnConfirmarPago.addEventListener('click', async () => {
-            const originalText = btnConfirmarPago.innerHTML;
-            btnConfirmarPago.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando transacción...';
-            btnConfirmarPago.disabled = true;
-
-            const formData = new FormData(formPagoSeguro);
-            const data = Object.fromEntries(formData.entries());
-            const csrfToken = document.querySelector('input[name="_token"]').value;
-
-
-            try {
-                const response = await fetch('/checkout/pago/confirmar', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                const result = await response.json();
-
-                if (response.ok && result.status === 'success') {
-                    alert(result.message);
-                    window.location.href = result.redirect_url;
-                } else {
-                    alert(result.message || 'Error al procesar el pago.');
-                    btnConfirmarPago.innerHTML = originalText;
-                    btnConfirmarPago.disabled = false;
-                }
-            } catch (error) {
-                alert('Error de conexión con el banco.');
-                btnConfirmarPago.innerHTML = originalText;
-                btnConfirmarPago.disabled = false;
-            }
-        });
-    }
 });

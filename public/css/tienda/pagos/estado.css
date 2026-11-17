@@ -1,0 +1,87 @@
+.payment-success-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: rgba(1, 16, 24, 0.82);
+    opacity: 0;
+    transition: opacity 180ms ease;
+}
+
+.payment-success-modal[hidden] {
+    display: none;
+}
+
+.payment-success-modal.is-visible {
+    opacity: 1;
+}
+
+.payment-success-modal__card {
+    width: min(100%, 460px);
+    padding: 2.25rem;
+    border: 1px solid rgba(45, 212, 191, 0.45);
+    border-radius: 18px;
+    background: #0a202b;
+    color: #f4fbfc;
+    text-align: center;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+    transform: translateY(14px) scale(0.98);
+    transition: transform 180ms ease;
+}
+
+.payment-success-modal.is-visible .payment-success-modal__card {
+    transform: translateY(0) scale(1);
+}
+
+.payment-success-modal__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 76px;
+    height: 76px;
+    margin-bottom: 1.25rem;
+    border-radius: 50%;
+    background: #2dd4bf;
+    color: #06202a;
+    font-size: 2rem;
+}
+
+.payment-success-modal__card h2 {
+    margin: 0 0 0.8rem;
+    color: #2dd4bf;
+    font-size: 1.65rem;
+}
+
+.payment-success-modal__card p {
+    margin: 0.55rem 0;
+    line-height: 1.5;
+}
+
+.payment-success-modal__redirect {
+    color: #b7cbd3;
+}
+
+.payment-success-modal__button {
+    display: inline-flex;
+    justify-content: center;
+    margin-top: 1.25rem;
+    padding: 0.8rem 1.35rem;
+    border-radius: 10px;
+    background: #2dd4bf;
+    color: #06202a;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.payment-success-modal__button:hover {
+    background: #5eead4;
+}
+
+@media (max-width: 520px) {
+    .payment-success-modal__card {
+        padding: 1.75rem 1.25rem;
+    }
+}

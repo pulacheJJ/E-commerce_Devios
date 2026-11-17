@@ -19,7 +19,7 @@
         @endif
 
         @if ($producto->imagen_principal)
-            <img src="{{ asset('storage/' . $producto->imagen_principal) }}" alt="{{ $producto->nombre }}" class="product-card__image">
+            <img src="{{ $producto->imagen_principal_url }}" alt="{{ $producto->nombre }}" class="product-card__image">
         @else
             <div class="product-card__no-image">Sin imagen</div>
         @endif

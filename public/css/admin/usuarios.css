@@ -301,3 +301,30 @@
 .text-muted {
     color: var(--text-secondary);
 }
+.manager-permissions__notice {
+    margin-bottom: 16px;
+}
+
+.manager-permissions__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.manager-permissions__group {
+    padding: 14px;
+    border: 1px solid #29455a;
+    border-radius: 8px;
+}
+
+.manager-permissions__legend {
+    padding: 0 6px;
+    font-weight: 700;
+}
+
+.manager-permissions__option {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin: 8px 0;
+}

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="700" viewBox="0 0 900 700">
+  <rect width="900" height="700" fill="#071923"/>
+  <path d="M250 390V310c0-115 85-205 200-205s200 90 200 205v80" fill="none" stroke="#2dd4bf" stroke-width="54" stroke-linecap="round"/>
+  <rect x="185" y="340" width="145" height="235" rx="58" fill="#334155" stroke="#67e8f9" stroke-width="8"/>
+  <rect x="570" y="340" width="145" height="235" rx="58" fill="#334155" stroke="#67e8f9" stroke-width="8"/>
+  <text x="450" y="650" text-anchor="middle" fill="#fff" font-family="Arial" font-size="42" font-weight="700">AUDIO DEVIOZ</text>
+</svg>

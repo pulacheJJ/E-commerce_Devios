@@ -1,6 +1,8 @@
 @import url('admin/sliders.css');
 @import url('admin/promociones.css');
 @import url('admin/usuarios.css');
+@import url('admin/envios.css');
+@import url('admin/productos.css');
 
 :root {
     --bg: #06121a;
@@ -557,4 +559,38 @@ h6 {
 /* Efecto al hacer clic */
 .btn-logout:active {
     transform: scale(0.98);
+}
+
+.top-bar__user-icon {
+    margin-right: 8px;
+    color: var(--teal);
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.dashboard-card__title {
+    margin: 0;
+    color: #4a6b82;
+}
+
+.dashboard-card__value {
+    margin: 10px 0;
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.dashboard-card__link {
+    color: var(--teal);
+    font-size: 0.9rem;
+    text-decoration: none;
+}
+
+.btn--activate {
+    color: var(--bg);
+    background-color: var(--teal);
+    border: 0;
 }

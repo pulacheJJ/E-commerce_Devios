@@ -3,17 +3,17 @@
 @endphp
 
 <div id="manager-permissions" class="form-group full-width" hidden>
-    <div class="alert-info" style="margin-bottom: 16px;">
+    <div class="alert-info manager-permissions__notice">
         <i class="fas fa-shield-alt"></i>
         Selecciona únicamente los accesos que tendrá este gestor. Debe conservar al menos uno.
     </div>
 
-    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px;">
+    <div class="manager-permissions__grid">
         @foreach ($permissionGroups as $group)
-            <fieldset style="border:1px solid #29455a; border-radius:8px; padding:14px;">
-                <legend style="padding:0 6px; font-weight:700;">{{ $group['label'] }}</legend>
+            <fieldset class="manager-permissions__group">
+                <legend class="manager-permissions__legend">{{ $group['label'] }}</legend>
                 @foreach ($group['permissions'] as $permission)
-                    <label style="display:flex; align-items:center; gap:8px; margin:8px 0;">
+                    <label class="manager-permissions__option">
                         <input type="checkbox" name="permissions[]" value="{{ $permission['name'] }}"
                             @checked(in_array($permission['name'], $checkedPermissions, true))>
                         <span>{{ $permission['label'] }}</span>

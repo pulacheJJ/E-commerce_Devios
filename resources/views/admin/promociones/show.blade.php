@@ -56,7 +56,7 @@
             <div class="panel-card">
                 <h3 class="panel-title">Banner Publicitario</h3>
                 @if($promocione->ruta_banner)
-                    <img src="{{ asset('storage/' . $promocione->ruta_banner) }}" alt="Banner" class="show-banner-img">
+                    <img src="{{ $promocione->imagen_url }}" alt="Banner" class="show-banner-img">
                 @else
                     <div class="no-image-placeholder">Sin imagen</div>
                 @endif

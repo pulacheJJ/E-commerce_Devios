@@ -11,6 +11,7 @@ class ChangeAdminResourceStatusRequest extends FormRequest
         'admin.productos.toggle' => 'productos.cambiar_estado',
         'admin.categorias.toggle' => 'categorias.cambiar_estado',
         'admin.promociones.toggle' => 'promociones.cambiar_estado',
+        'admin.envios.toggle' => 'envios.cambiar_estado',
     ];
 
     public function authorize(): bool

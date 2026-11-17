@@ -9,10 +9,9 @@
         @endif
 
         @if ($errors->any())
-            <div
-                style="background-color: #7f1d1d; color: #fca5a5; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                <strong style="display:block; margin-bottom: 10px;">¡Ups! Hubo un problema:</strong>
-                <ul style="margin: 0; padding-left: 20px;">
+            <div class="slider-alert-error">
+                <strong class="slider-alert-error__title">¡Ups! Hubo un problema:</strong>
+                <ul class="slider-alert-error__list">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach

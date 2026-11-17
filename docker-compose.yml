@@ -1,4 +1,54 @@
-version: '3.8'
+x-app-environment: &app-environment
+  APP_ENV: ${DOCKER_APP_ENV:-production}
+  APP_DEBUG: ${DOCKER_APP_DEBUG:-false}
+  APP_KEY: ${APP_KEY}
+  APP_URL: ${APP_URL}
+  FORCE_HTTPS: ${FORCE_HTTPS:-false}
+  ADMIN_DOMAIN: ${ADMIN_DOMAIN:-}
+  LOG_CHANNEL: ${LOG_CHANNEL:-stack}
+  LOG_LEVEL: ${LOG_LEVEL:-warning}
+  FILESYSTEM_DISK: ${FILESYSTEM_DISK:-public}
+  MEDIA_DISK: ${MEDIA_DISK:-public}
+  CACHE_DRIVER: ${CACHE_DRIVER:-file}
+  QUEUE_CONNECTION: ${QUEUE_CONNECTION:-sync}
+  SESSION_DRIVER: ${SESSION_DRIVER:-file}
+  SESSION_LIFETIME: ${SESSION_LIFETIME:-120}
+  SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-true}
+  SESSION_SAME_SITE: ${SESSION_SAME_SITE:-lax}
+  SESSION_DOMAIN: ${SESSION_DOMAIN:-}
+  DB_CONNECTION: ${DB_CONNECTION:-mysql}
+  DB_HOST: ${DB_HOST:-db}
+  DB_PORT: ${DB_PORT:-3306}
+  DB_DATABASE: ${DB_DATABASE}
+  DB_USERNAME: ${DB_USERNAME}
+  DB_PASSWORD: ${DB_PASSWORD}
+  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+  AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+  AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-auto}
+  AWS_BUCKET: ${AWS_BUCKET:-}
+  AWS_URL: ${AWS_URL:-}
+  AWS_ENDPOINT: ${AWS_ENDPOINT:-}
+  AWS_USE_PATH_STYLE_ENDPOINT: ${AWS_USE_PATH_STYLE_ENDPOINT:-false}
+  CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}
+  CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-}
+  CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-}
+  CLOUDINARY_DELIVERY_URL: ${CLOUDINARY_DELIVERY_URL:-}
+  RUN_MIGRATIONS: ${RUN_MIGRATIONS:-false}
+  RUN_DEMO_SEEDERS: ${RUN_DEMO_SEEDERS:-false}
+  RUN_MEDIA_COPY: ${RUN_MEDIA_COPY:-false}
+  MEDIA_COPY_FROM: ${MEDIA_COPY_FROM:-public}
+  RUN_SCHEDULER: ${RUN_SCHEDULER:-false}
+  SEED_ADMIN_NAME: ${SEED_ADMIN_NAME:-}
+  SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-}
+  SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
+  PAYMENT_SIMULATOR_ENABLED: ${PAYMENT_SIMULATOR_ENABLED:-false}
+  PAYMENT_SIMULATOR_SECRET: ${PAYMENT_SIMULATOR_SECRET:-}
+  MERCADOPAGO_ENABLED: ${MERCADOPAGO_ENABLED:-false}
+  MERCADOPAGO_MODE: ${MERCADOPAGO_MODE:-test}
+  MERCADOPAGO_ALLOW_LIVE: ${MERCADOPAGO_ALLOW_LIVE:-false}
+  MERCADOPAGO_TEST_PUBLIC_KEY: ${MERCADOPAGO_TEST_PUBLIC_KEY:-}
+  MERCADOPAGO_TEST_ACCESS_TOKEN: ${MERCADOPAGO_TEST_ACCESS_TOKEN:-}
+  MERCADOPAGO_TEST_WEBHOOK_SECRET: ${MERCADOPAGO_TEST_WEBHOOK_SECRET:-}
 
 services:
   app:
@@ -11,26 +61,28 @@ services:
     ports:
       - "8000:80"
     environment:
-      APP_ENV: ${DOCKER_APP_ENV:-production}
-      APP_DEBUG: ${DOCKER_APP_DEBUG:-false}
-      APP_KEY: ${APP_KEY}
-      APP_URL: ${APP_URL}
-      LOG_CHANNEL: ${LOG_CHANNEL:-stack}
-      LOG_LEVEL: ${LOG_LEVEL:-warning}
-      FILESYSTEM_DISK: ${FILESYSTEM_DISK:-public}
-      SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-true}
-      DB_CONNECTION: ${DB_CONNECTION}
-      DB_HOST: db
-      DB_PORT: ${DB_PORT}
-      DB_DATABASE: ${DB_DATABASE}
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
+      <<: *app-environment
     depends_on:
       db:
         condition: service_healthy
     volumes:
       - app_storage:/var/www/html/storage/app/public
-      - slider_data:/var/www/html/public/img/sliders
+
+  scheduler:
+    image: devioz-ecommerce-app
+    restart: unless-stopped
+    command: ["php", "artisan", "schedule:work"]
+    environment:
+      <<: *app-environment
+      RUN_MIGRATIONS: "false"
+      RUN_DEMO_SEEDERS: "false"
+      RUN_MEDIA_COPY: "false"
+      RUN_SCHEDULER: "false"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - app_storage:/var/www/html/storage/app/public
 
   db:
     image: mysql:8.0
@@ -52,4 +104,3 @@ services:
 volumes:
   db_data:
   app_storage:
-  slider_data:

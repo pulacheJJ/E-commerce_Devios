@@ -22,4 +22,9 @@ class Provincia extends Model
     {
         return $this->hasMany(Distrito::class);
     }
+
+    public function tarifaEnvio()
+    {
+        return $this->hasOne(TarifaEnvio::class);
+    }
 }

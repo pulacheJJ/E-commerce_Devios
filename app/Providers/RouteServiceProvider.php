@@ -50,6 +50,10 @@ class RouteServiceProvider extends ServiceProvider
             Limit::perMinute(30)->by($request->session()->getId().'|'.$request->ip())
         );
 
+        RateLimiter::for('payment-webhook', fn (Request $request) =>
+            Limit::perMinute(120)->by((string) $request->route('provider').'|'.$request->ip())
+        );
+
         $this->routes(function () {
             Route::middleware('api')
                 ->prefix('api')

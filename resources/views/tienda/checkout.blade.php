@@ -22,14 +22,13 @@
         </div>
 
         <div class="checkout-grid">
-            <section class="checkout-form-card" style="padding: 0; background: transparent; border: none;">
+            <section class="checkout-form-card checkout-form-card--plain">
                 <x-tienda.formulario-personal />
             </section>
 
             <!-- Resumen Lateral -->
             <aside class="checkout-summary">
-                <h2 class="checkout-section-title"
-                    style="margin-top: 0; border-bottom: 1px solid #1e293b; padding-bottom: 10px;">Resumen de la compra
+                <h2 class="checkout-section-title checkout-summary__title">Resumen de la compra
                 </h2>
 
                 <div class="checkout-items-list">
@@ -37,7 +36,7 @@
                         <div class="summary-item">
                             <div class="summary-item-info">
                                 @if ($item->variante->producto->imagen_principal)
-                                    <img src="{{ asset('storage/' . $item->variante->producto->imagen_principal) }}"
+                                    <img src="{{ $item->variante->producto->imagen_principal_url }}"
                                         alt="img">
                                 @else
                                     <div class="summary-no-img">Sin foto</div>
@@ -57,7 +56,7 @@
                 <div class="summary-totals-row"><span>Entregas</span><span id="resumenCostoEnvio">Por calcular</span>
                 </div>
 
-                <div class="summary-grand-total" style="margin-bottom: 20px;">
+                <div class="summary-grand-total summary-grand-total--spaced">
                     <span>Total:</span><span>S/ {{ number_format($carrito->total, 2) }}</span>
                 </div>
 

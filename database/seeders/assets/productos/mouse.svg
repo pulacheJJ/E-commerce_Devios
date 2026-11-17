@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="700" viewBox="0 0 900 700">
+  <rect width="900" height="700" fill="#071923"/>
+  <path d="M450 85c-145 0-235 115-235 290 0 170 90 270 235 270s235-100 235-270C685 200 595 85 450 85z" fill="#334155" stroke="#2dd4bf" stroke-width="9"/>
+  <path d="M450 90v210" stroke="#67e8f9" stroke-width="8"/>
+  <rect x="423" y="150" width="54" height="100" rx="27" fill="#2dd4bf"/>
+  <text x="450" y="475" text-anchor="middle" fill="#fff" font-family="Arial" font-size="42" font-weight="700">DEVIOZ</text>
+</svg>

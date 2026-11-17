@@ -9,7 +9,7 @@ class StageTwoHttpContractConfigurationTest extends TestCase
 {
     public function test_permission_map_contains_all_declared_modules(): void
     {
-        foreach (['usuarios', 'productos', 'categorias', 'promociones', 'sliders', 'pedidos'] as $module) {
+        foreach (['usuarios', 'productos', 'categorias', 'promociones', 'sliders', 'pedidos', 'envios'] as $module) {
             $this->assertNotEmpty(array_filter(PermissionSeeder::PERMISSIONS, fn (string $permission) => str_starts_with($permission, $module.'.')));
         }
     }
@@ -23,6 +23,7 @@ class StageTwoHttpContractConfigurationTest extends TestCase
             'admin.categorias.update' => 'permission:categorias.editar',
             'admin.promociones.toggle' => 'permission:promociones.cambiar_estado',
             'admin.sliders.store' => 'permission:sliders.crear',
+            'admin.envios.toggle' => 'permission:envios.cambiar_estado',
         ];
 
         foreach ($expected as $name => $middleware) {

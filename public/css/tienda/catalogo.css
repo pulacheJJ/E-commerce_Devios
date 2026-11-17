@@ -1,0 +1,10 @@
+.products-empty__icon {
+    margin-bottom: 15px;
+    color: #cbd5e1;
+    font-size: 3rem;
+}
+
+.products-empty__action {
+    display: inline-block;
+    margin-top: 15px;
+}

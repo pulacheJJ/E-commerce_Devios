@@ -55,6 +55,12 @@
                     <i class="fas fa-users"></i> Usuarios
                 </a>
                 @endcan
+                @can('envios.ver')
+                <a href="{{ route('admin.envios.index') }}"
+                    class="{{ request()->routeIs('admin.envios.*') ? 'active' : '' }}">
+                    <i class="fas fa-truck"></i> Tarifas de envío
+                </a>
+                @endcan
                 <hr>
                 <a href="{{ route('tienda.inicio') }}" target="_blank" class="nav-link">
                     <i class="fas fa-store"></i>
@@ -77,7 +83,7 @@
             <header class="top-bar">
                 <div class="top-bar__search"></div>
                 <div class="top-bar__user">
-                    <i class="fas fa-user-shield" style="color: var(--teal); margin-right: 8px;"></i>
+                    <i class="fas fa-user-shield top-bar__user-icon"></i>
                     <span>{{ auth()->user()->hasRole('admin') ? 'Administrador' : 'Gestor' }}</span>
                 </div>
             </header>

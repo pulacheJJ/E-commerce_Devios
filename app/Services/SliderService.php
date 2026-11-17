@@ -3,7 +3,8 @@
 namespace App\Services;
 
 use App\Models\Slider;
-use Illuminate\Support\Str;
+use App\Support\MediaStorage;
+use Illuminate\Http\UploadedFile;
 
 class SliderService
 {
@@ -17,47 +18,44 @@ class SliderService
         return Slider::findOrFail($id);
     }
 
-    public function guardarSlider(array $data, $file): Slider
+    public function guardarSlider(array $data, UploadedFile $file): Slider
     {
-        $nombreLimpio = time() . '_' . Str::slug($data['titulo'] ?? 'banner') . '.' . $file->getClientOriginalExtension();
-        $file->move(public_path('img/sliders'), $nombreLimpio);
+        $rutaImagen = $file->store('sliders', MediaStorage::diskName());
 
         $esActivo = array_key_exists('activo', $data) ? true : false;
-        
+
         return Slider::create([
-            'titulo'     => $data['titulo'] ?? null,
-            'subtitulo'  => $data['subtitulo'] ?? null,
+            'titulo' => $data['titulo'] ?? null,
+            'subtitulo' => $data['subtitulo'] ?? null,
             'url_enlace' => $data['url_enlace'] ?? null,
-            'imagen_url' => $nombreLimpio,
-            'orden'      => $data['orden'],
-            'activo'     => $esActivo,
+            'imagen_url' => $rutaImagen,
+            'orden' => $data['orden'],
+            'activo' => $esActivo,
         ]);
     }
 
-    public function actualizarSlider(int $id, array $data, $file = null): Slider
+    public function actualizarSlider(int $id, array $data, ?UploadedFile $file = null): Slider
     {
         $slider = Slider::findOrFail($id);
+        $rutaAnterior = $slider->getRawOriginal('imagen_url');
 
         if ($file) {
-            $rutaVieja = public_path('img/sliders/' . $slider->imagen_url);
-            if (file_exists($rutaVieja)) {
-                @unlink($rutaVieja);
-            }
-
-            $nombreLimpio = time() . '_' . Str::slug($data['titulo'] ?? 'banner') . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('img/sliders'), $nombreLimpio);
-            $slider->imagen_url = $nombreLimpio;
+            $slider->imagen_url = $file->store('sliders', MediaStorage::diskName());
         }
 
         $esActivo = array_key_exists('activo', $data) ? true : false;
 
         $slider->update([
-            'titulo'     => $data['titulo'] ?? null,
-            'subtitulo'  => $data['subtitulo'] ?? null,
+            'titulo' => $data['titulo'] ?? null,
+            'subtitulo' => $data['subtitulo'] ?? null,
             'url_enlace' => $data['url_enlace'] ?? null,
-            'orden'      => $data['orden'],
-            'activo'     => $esActivo,
+            'orden' => $data['orden'],
+            'activo' => $esActivo,
         ]);
+
+        if ($file && $rutaAnterior !== $slider->getRawOriginal('imagen_url')) {
+            $this->eliminarArchivo($rutaAnterior);
+        }
 
         return $slider;
     }
@@ -65,12 +63,37 @@ class SliderService
     public function eliminarSlider(int $id): bool
     {
         $slider = Slider::findOrFail($id);
-        
-        $rutaFisica = public_path('img/sliders/' . $slider->imagen_url);
-        if (file_exists($rutaFisica)) {
-            @unlink($rutaFisica);
+        $rutaImagen = $slider->getRawOriginal('imagen_url');
+
+        $eliminado = $slider->delete();
+
+        if ($eliminado) {
+            $this->eliminarArchivo($rutaImagen);
         }
 
-        return $slider->delete();
+        return $eliminado;
+    }
+
+    private function eliminarArchivo(?string $ruta): void
+    {
+        if (! $ruta) {
+            return;
+        }
+
+        if (str_contains($ruta, '/')) {
+            try {
+                MediaStorage::disk()->delete($ruta);
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
+
+            return;
+        }
+
+        // Compatibilidad con banners creados antes de usar el disco publico.
+        $rutaAnterior = public_path('img/sliders/'.basename($ruta));
+        if (is_file($rutaAnterior)) {
+            unlink($rutaAnterior);
+        }
     }
 }

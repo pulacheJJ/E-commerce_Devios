@@ -42,13 +42,11 @@
                         <x-tarjeta-producto :producto="$producto" />
                     @empty
                         <div class="products-empty">
-                            <i class="fas fa-box-open"
-                                style="font-size: 3rem; color: #cbd5e1; margin-bottom: 15px;"></i>
+                            <i class="fas fa-box-open products-empty__icon"></i>
                             <h3>No encontramos productos</h3>
                             <p>Intenta quitando algunos filtros o buscando otra palabra.</p>
                             @if (request()->anyFilled(['buscar', 'categoria']))
-                                <a href="{{ route('tienda.inicio') }}" class="btn btn--primary"
-                                    style="margin-top: 15px; display: inline-block;">Limpiar filtros</a>
+                                <a href="{{ route('tienda.inicio') }}" class="btn btn--primary products-empty__action">Limpiar filtros</a>
                             @endif
                         </div>
                     @endforelse

@@ -366,3 +366,26 @@
     padding: 10px 25px;
     border-radius: 6px;
 }
+.slider-alert-error {
+    padding: 15px;
+    margin-bottom: 20px;
+    color: #fca5a5;
+    background-color: #7f1d1d;
+    border-radius: 8px;
+}
+
+.slider-alert-error__title {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.slider-alert-error__list {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.slider-btn-ver {
+    color: #38bdf8;
+    font-weight: 600;
+    text-decoration: none;
+}

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Categoria;
 use App\Models\Producto;
+use App\Support\MediaStorage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -79,7 +80,7 @@ class ProductoService
     {
         foreach ($imagenes as $index => $archivo) {
             $producto->imagenes()->create([
-                'ruta_imagen' => $archivo->store('products', 'public'),
+                'ruta_imagen' => $archivo->store('products', MediaStorage::diskName()),
                 'es_principal' => $index === 0 ? true : false, // La primera de la lista será la portada
             ]);
         }
@@ -117,7 +118,7 @@ class ProductoService
     {
         foreach ($imagenes as $archivo) {
             $producto->imagenes()->create([
-                'ruta_imagen' => $archivo->store('products', 'public'),
+                'ruta_imagen' => $archivo->store('products', MediaStorage::diskName()),
                 'es_principal' => false,
             ]);
         }

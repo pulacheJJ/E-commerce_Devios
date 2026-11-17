@@ -68,7 +68,7 @@ class StageOneBusinessIntegrityTest extends TestCase
 
     public function test_expiration_releases_stock_exactly_once(): void
     {
-        $pedido = Pedido::where('estado', 'pendiente')->has('detalles')->firstOrFail();
+        $pedido = Pedido::whereIn('estado', ['reservado', 'pendiente_pago'])->has('detalles')->firstOrFail();
         $pedido->update(['expires_at' => now()->subMinute(), 'inventory_released_at' => null]);
         $quantities = $pedido->detalles()
             ->select('variante_id', DB::raw('SUM(cantidad) AS cantidad_total'))
@@ -140,8 +140,8 @@ class StageOneBusinessIntegrityTest extends TestCase
 
     public function test_legacy_pending_orders_are_not_expired_without_an_expiration_date(): void
     {
-        $legacyIds = Pedido::where('estado', 'pendiente')->whereNull('expires_at')->pluck('id');
+        $legacyIds = Pedido::where('estado', 'pendiente_pago')->whereNull('expires_at')->pluck('id');
         $this->artisan('pedidos:expirar-pendientes')->assertSuccessful();
-        $this->assertSame($legacyIds->count(), Pedido::whereIn('id', $legacyIds)->where('estado', 'pendiente')->count());
+        $this->assertSame($legacyIds->count(), Pedido::whereIn('id', $legacyIds)->where('estado', 'pendiente_pago')->count());
     }
 }

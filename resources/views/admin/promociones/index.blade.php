@@ -34,7 +34,7 @@
                         <tr>
                             <td>
                                 @if($promo->ruta_banner)
-                                    <img src="{{ asset('storage/' . $promo->ruta_banner) }}" alt="Banner" class="img-thumbnail-mini">
+                                    <img src="{{ $promo->imagen_url }}" alt="Banner" class="img-thumbnail-mini">
                                 @else
                                     <span class="badge badge-secondary">Sin imagen</span>
                                 @endif

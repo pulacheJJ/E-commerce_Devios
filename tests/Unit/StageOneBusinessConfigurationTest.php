@@ -21,7 +21,7 @@ class StageOneBusinessConfigurationTest extends TestCase
     public function test_pending_order_expiration_configuration_is_valid(): void
     {
         $this->assertGreaterThan(0, config('pedidos.expiration_minutes'));
-        $this->assertSame(['pendiente'], config('pedidos.expirable_states'));
+        $this->assertSame(['reservado', 'pendiente_pago'], config('pedidos.expirable_states'));
         $this->assertGreaterThan(0, config('pedidos.cart_expiration_days'));
     }
 

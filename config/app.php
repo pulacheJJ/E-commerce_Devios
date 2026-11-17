@@ -57,6 +57,12 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    // Fuerza enlaces y redirecciones HTTPS cuando la aplicacion esta detras de un proxy TLS.
+    'force_https' => filter_var(env('FORCE_HTTPS', false), FILTER_VALIDATE_BOOL),
+
+    // Optional host dedicated to the administrative panel.
+    'admin_domain' => env('ADMIN_DOMAIN'),
+
     'asset_url' => env('ASSET_URL'),
 
     /*

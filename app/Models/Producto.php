@@ -38,14 +38,22 @@ class Producto extends Model
         return $this->hasMany(ImagenProducto::class, 'producto_id', 'id');
     }
 
-    //busca la imagen principal o devuelve la primera que encuentre
+    // busca la imagen principal o devuelve la primera que encuentre
     public function getImagenPrincipalAttribute()
     {
         $imagen = $this->imagenes->where('es_principal', true)->first() ?? $this->imagenes->first();
+
         return $imagen ? $imagen->ruta_imagen : null;
     }
 
-    //busca la primera variante en stock
+    public function getImagenPrincipalUrlAttribute(): ?string
+    {
+        $imagen = $this->imagenes->where('es_principal', true)->first() ?? $this->imagenes->first();
+
+        return $imagen?->url;
+    }
+
+    // busca la primera variante en stock
     public function getVariantePorDefectoAttribute()
     {
         return $this->variantes->where('stock', '>', 0)->first() ?? $this->variantes->first();
@@ -82,6 +90,7 @@ class Producto extends Model
     public function getPrecioOriginalAttribute()
     {
         $variante = $this->variante_por_defecto;
+
         return $variante ? $variante->precio : 0;
     }
 
@@ -90,7 +99,7 @@ class Producto extends Model
     {
         $variante = $this->variante_por_defecto;
 
-        if (!$variante) {
+        if (! $variante) {
             return 0;
         }
 
@@ -99,13 +108,14 @@ class Producto extends Model
         $promo = $this->promocion_activa;
 
         // Si no hay promoción de campaña, devuelve el precio real de la variante
-        if (!$promo || $precioBase <= 0) {
+        if (! $promo || $precioBase <= 0) {
             return $precioBase;
         }
 
         // Si hay promoción, aplicamos la matemática
         if ($promo->tipo_descuento === 'porcentaje') {
             $descuento = $precioBase * ($promo->valor_descuento / 100);
+
             return max(0, $precioBase - $descuento);
         }
 
@@ -129,10 +139,10 @@ class Producto extends Model
                 if ($this->promocion_activa->tipo_descuento === 'porcentaje') {
                     $descuento = $precioBase * ($this->promocion_activa->valor_descuento / 100);
                     $precioFinal = max(0, $precioBase - $descuento);
-                    $descuentoInfo = "-" . number_format($this->promocion_activa->valor_descuento, 0) . "% OFF";
+                    $descuentoInfo = '-'.number_format($this->promocion_activa->valor_descuento, 0).'% OFF';
                 } else {
                     $precioFinal = max(0, $precioBase - $this->promocion_activa->valor_descuento);
-                    $descuentoInfo = "- S/ " . number_format($this->promocion_activa->valor_descuento, 2);
+                    $descuentoInfo = '- S/ '.number_format($this->promocion_activa->valor_descuento, 2);
                 }
             }
 
@@ -143,7 +153,7 @@ class Producto extends Model
                 'precio_original' => $precioBase,
                 'precio_final' => $precioFinal,
                 'hay_descuento' => $hayDescuento,
-                'descuento_info' => $descuentoInfo
+                'descuento_info' => $descuentoInfo,
             ];
         });
     }

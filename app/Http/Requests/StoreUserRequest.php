@@ -29,7 +29,7 @@ class StoreUserRequest extends FormRequest
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
             'password' => ['required', 'string', 'min:8', 'max:255', 'confirmed'],
             'role' => ['required', 'string', Rule::in(['admin', 'gestor']), Rule::exists('roles', 'name')->where('guard_name', 'web')],
-            'permissions' => [Rule::requiredIf(fn () => $this->input('role') === 'gestor'), 'array', 'min:1', 'max:23'],
+            'permissions' => [Rule::requiredIf(fn () => $this->input('role') === 'gestor'), 'array', 'min:1', 'max:27'],
             'permissions.*' => ['string', 'distinct', Rule::in(PermissionSeeder::PERMISSIONS)],
         ];
     }

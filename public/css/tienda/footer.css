@@ -181,3 +181,7 @@
     .footer-main { grid-template-columns: 1fr; }
     .footer-bottom-content { flex-direction: column; justify-content: center; }
 }
+.footer-link-icon {
+    margin-right: 5px;
+    font-size: 0.8em;
+}

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\MediaStorage;
 use Illuminate\Database\Eloquent\Model;
 
 class Slider extends Model
@@ -14,7 +15,7 @@ class Slider extends Model
         'imagen_url',
         'url_enlace',
         'orden',
-        'activo'
+        'activo',
     ];
 
     protected $casts = [
@@ -23,7 +24,14 @@ class Slider extends Model
 
     public function getImagenUrlAttribute()
     {
-        return asset('img/sliders/' . $this->attributes['imagen_url']);
+        $ruta = $this->attributes['imagen_url'];
+
+        if (str_contains($ruta, '/')) {
+            return MediaStorage::url($ruta);
+        }
+
+        // Compatibilidad con los registros existentes del directorio publico.
+        return asset('img/sliders/'.$ruta);
     }
 
     public function getUrlDestinoAttribute()

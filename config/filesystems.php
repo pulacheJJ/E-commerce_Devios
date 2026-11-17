@@ -16,6 +16,12 @@ return [
     'default' => env('FILESYSTEM_DISK', 'local'),
 
     /*
+    | Disk exclusivo para fotografias y banners administrables.
+    | En local usa public; en despliegue puede apuntar a Cloudinary o S3/R2.
+    */
+    'media_disk' => env('MEDIA_DISK', 'public'),
+
+    /*
     |--------------------------------------------------------------------------
     | Filesystem Disks
     |--------------------------------------------------------------------------
@@ -41,7 +47,7 @@ return [
             'root' => storage_path('app/public'),
             'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
-            'throw' => false,
+            'throw' => true,
         ],
 
         's3' => [
@@ -53,7 +59,18 @@ return [
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
-            'throw' => false,
+            'throw' => true,
+        ],
+
+        'cloudinary' => [
+            'driver' => 'cloudinary',
+            'url' => env(
+                'CLOUDINARY_DELIVERY_URL',
+                env('CLOUDINARY_CLOUD_NAME')
+                    ? 'https://res.cloudinary.com/'.env('CLOUDINARY_CLOUD_NAME').'/image/upload'
+                    : null
+            ),
+            'throw' => true,
         ],
 
     ],

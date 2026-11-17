@@ -13,7 +13,7 @@
                     @endif
 
                     {{-- 2. Imagen Única (Enlace envuelve a la imagen) --}}
-                    <a href="{{ $slide->url_destino ?? $slide->link }}" style="display:block; height:100%;">
+                    <a href="{{ $slide->url_destino ?? $slide->link }}" class="slide-image-link">
                         <img src="{{ $slide->imagen_url }}" alt="{{ $slide->titulo ?? 'Banner' }}" class="slide-img">
                     </a>
 

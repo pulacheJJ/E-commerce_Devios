@@ -5,44 +5,92 @@ use App\Http\Controllers\Admin\CategoriaController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\PromocionController;
+use App\Http\Controllers\Admin\ShippingRateController;
 use App\Http\Controllers\Admin\SliderController;
 use App\Http\Controllers\CarritoController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\PaymentWebhookController;
+use App\Http\Controllers\SimulatedPaymentController;
 use App\Http\Controllers\TiendaController;
 use Illuminate\Support\Facades\Route;
+
+$adminDomain = config('app.admin_domain');
+$storeDomain = parse_url((string) config('app.url'), PHP_URL_HOST);
+$storeRoutes = $adminDomain && is_string($storeDomain)
+    ? Route::domain($storeDomain)
+    : Route::middleware([]);
+
+Route::get('/health', fn () => response()->json(['status' => 'ok']))
+    ->name('health');
 
 // ==========================================
 // RUTAS PÚBLICAS Tienda
 // ==========================================
 
 // 1. LA TIENDA (Público) - Catálogo directo en la raíz
-Route::get('/', [TiendaController::class, 'index'])->name('tienda.inicio');
+$storeRoutes->group(function (): void {
+    Route::get('/', [TiendaController::class, 'index'])->name('tienda.inicio');
 
-Route::get('/producto/{slug}', [TiendaController::class, 'show'])->name('tienda.producto');
+    Route::get('/producto/{slug}', [TiendaController::class, 'show'])->name('tienda.producto');
 
-// Carrito
-Route::get('/carrito', [CarritoController::class, 'index'])->name('carrito.index');
-Route::post('/carrito/agregar', [CarritoController::class, 'agregar'])->middleware('throttle:carrito')->name('carrito.agregar');
-Route::delete('/carrito/eliminar/{id}', [CarritoController::class, 'eliminar'])->middleware('throttle:carrito')->name('carrito.eliminar');
-Route::put('/carrito/actualizar/{id}', [CarritoController::class, 'actualizar'])->middleware('throttle:carrito')->name('carrito.actualizar');
+    // Carrito
+    Route::get('/carrito', [CarritoController::class, 'index'])->name('carrito.index');
+    Route::post('/carrito/agregar', [CarritoController::class, 'agregar'])->middleware('throttle:carrito')->name('carrito.agregar');
+    Route::delete('/carrito/eliminar/{id}', [CarritoController::class, 'eliminar'])->middleware('throttle:carrito')->name('carrito.eliminar');
+    Route::put('/carrito/actualizar/{id}', [CarritoController::class, 'actualizar'])->middleware('throttle:carrito')->name('carrito.actualizar');
 
-// Checkout
-Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-Route::post('/checkout/procesar', [CheckoutController::class, 'procesar'])->middleware('throttle:checkout')->name('checkout.procesar');
-Route::get('/checkout/pago/{numero_pedido}', [CheckoutController::class, 'pago'])->middleware('throttle:pago')->name('checkout.pago');
+    // Checkout
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout/procesar', [CheckoutController::class, 'procesar'])->middleware('throttle:checkout')->name('checkout.procesar');
+    Route::post('/checkout/reintentar/{numeroPedido}', [CheckoutController::class, 'reintentarPago'])->middleware('throttle:checkout')->name('checkout.reintentar');
+    Route::get('/checkout/pago/{numero_pedido}', [CheckoutController::class, 'pago'])->middleware('throttle:pago')->name('checkout.pago');
+    Route::get('/checkout/pago/{numeroPedido}/estado', [CheckoutController::class, 'estadoPago'])
+        ->middleware('throttle:pago')
+        ->name('checkout.pago.estado');
+    Route::get('/checkout/mercadopago/{numeroPedido}', [CheckoutController::class, 'mercadoPago'])
+        ->middleware('throttle:pago')
+        ->name('payments.mercadopago.show');
 
-// Promociones
-Route::get('/promocion/{id}', [TiendaController::class, 'promocion'])->name('tienda.promocion');
+    // Confirmación exclusiva de proveedores registrados; nunca confirma desde la sesión del navegador.
+    Route::post('/webhooks/pagos/{provider}', PaymentWebhookController::class)
+        ->middleware('throttle:payment-webhook')
+        ->name('payments.webhook');
+
+    Route::prefix('demo/pagos')->name('payments.simulator.')->middleware('payment.simulator')->group(function () {
+        Route::get('{pago}', [SimulatedPaymentController::class, 'show'])->name('show');
+        Route::post('{pago}/simular', [SimulatedPaymentController::class, 'simulate'])
+            ->middleware('throttle:pago')->name('simulate');
+        Route::post('{pago}/cancelar', [SimulatedPaymentController::class, 'cancel'])
+            ->middleware('throttle:pago')->name('cancel');
+    });
+
+    // Promociones
+    Route::get('/promocion/{id}', [TiendaController::class, 'promocion'])->name('tienda.promocion');
+});
 
 // ==========================================
 // RUTAS ADMINISTRATIVAS (Backoffice)
 // ==========================================
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login-admin')->name('login.post');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+$adminAuthRoutes = $adminDomain
+    ? Route::domain($adminDomain)
+    : Route::middleware([]);
+
+$adminAuthRoutes->group(function (): void {
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login-admin')->name('login.post');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+});
+
+if ($adminDomain) {
+    Route::domain($storeDomain)->get('/admin', fn () => redirect()->route('login'));
+}
 
 // El acceso a cada módulo se decide por permisos; admin y gestor comparten este grupo autenticado.
-Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+$adminRoutes = $adminDomain
+    ? Route::domain($adminDomain)
+    : Route::prefix('admin');
+
+$adminRoutes->name('admin.')->middleware(['auth'])->group(function () {
 
     // Inicio del Panel (Dashboard)
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
@@ -90,5 +138,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::match(['put', 'patch'], 'usuarios/{usuario}', [App\Http\Controllers\Admin\UserController::class, 'update'])->middleware('permission:usuarios.editar')->name('usuarios.update');
     Route::patch('usuarios/{usuario}/toggle', [App\Http\Controllers\Admin\UserController::class, 'toggle'])->middleware('permission:usuarios.cambiar_estado')->name('usuarios.toggle');
     Route::get('usuarios/{usuario}', [App\Http\Controllers\Admin\UserController::class, 'show'])->middleware('permission:usuarios.ver')->name('usuarios.show');
+
+    // Módulo de tarifas de envío
+    Route::get('envios', [ShippingRateController::class, 'index'])->middleware('permission:envios.ver')->name('envios.index');
+    Route::get('envios/create', [ShippingRateController::class, 'create'])->middleware('permission:envios.crear')->name('envios.create');
+    Route::post('envios', [ShippingRateController::class, 'store'])->middleware('permission:envios.crear')->name('envios.store');
+    Route::get('envios/{tarifa_envio}/edit', [ShippingRateController::class, 'edit'])->middleware('permission:envios.editar')->name('envios.edit');
+    Route::match(['put', 'patch'], 'envios/{tarifa_envio}', [ShippingRateController::class, 'update'])->middleware('permission:envios.editar')->name('envios.update');
+    Route::patch('envios/{tarifa_envio}/toggle', [ShippingRateController::class, 'toggle'])->middleware('permission:envios.cambiar_estado')->name('envios.toggle');
 
 });
